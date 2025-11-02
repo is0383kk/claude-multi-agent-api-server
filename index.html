@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<!--
+Claude Agent SDK APIテストインターフェース
+
+このHTMLファイルは、Claude Agent SDK APIをブラウザでテストするための
+Webインターフェースを提供します。エージェントの実行、状態監視、
+セッション管理などの機能をGUIで操作できます。
+-->
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claude Agent SDK - テストインターフェース</title>
+    <style>
+        /* 基本スタイル - ページ全体のレイアウトとフォント設定 */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+
+        /* コンテナースタイル - 各セクションの背景と陰影 */
+        .container {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* ヘッダースタイル - タイトルとセクションヘッダー */
+        h1, h2 {
+            color: #333;
+            border-bottom: 2px solid #007acc;
+            padding-bottom: 10px;
+        }
+
+        /* フォームスタイル - 入力フィールドとラベル */
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        /* 入力フィールドの共通スタイル */
+        input, textarea, select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+
+        /* テキストエリアのサイズ設定 */
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        /* ボタンの基本スタイル */
+        button {
+            background-color: #007acc;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+
+        /* ボタンのホバーと無効状態 */
+        button:hover {
+            background-color: #005a9e;
+        }
+
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        /* キャンセルボタンのスタイル */
+        .cancel-btn {
+            background-color: #dc3545;
+        }
+
+        .cancel-btn:hover {
+            background-color: #c82333;
+        }
+
+        /* ステータス表示のスタイル - 状態に応じた色分け */
+        .status-display {
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+
+        .status-pending { background-color: #fff3cd; color: #856404; } /* 待機中 */
+        .status-running { background-color: #d1ecf1; color: #0c5460; } /* 実行中 */
+        .status-completed { background-color: #d4edda; color: #155724; } /* 完了 */
+        .status-error { background-color: #f8d7da; color: #721c24; } /* エラー */
+        .status-cancelled { background-color: #e2e3e5; color: #383d41; } /* キャンセル */
+
+        /* レスポンス表示エリア - APIレスポンスのJSON表示用 */
+        .response-area {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 10px 0;
+            white-space: pre-wrap;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 12px;
+        }
+
+        /* セッションアイテムのスタイル */
+        .session-item {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 10px 0;
+            background-color: #fafafa;
+        }
+
+        .session-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .session-id {
+            font-family: monospace;
+            font-weight: bold;
+        }
+
+        /* レスポンシブルデザイン - 2列レイアウト */
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .two-column {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* 高度なオプションセクション - 折りたたみ可能 */
+        .advanced-options {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 15px 0;
+            background-color: #f9f9f9;
+        }
+
+        .advanced-options summary {
+            cursor: pointer;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Claude Agent SDK テストインターフェース</h1>
+
+    <div class="two-column">
+        <!-- 左カラム: エージェント実行フォーム -->
+        <div>
+            <div class="container">
+                <h2>エージェント実行</h2>
+                <form id="executeForm">
+                    <div class="form-group">
+                        <label for="prompt">プロンプト *</label>
+                        <textarea id="prompt" name="prompt" placeholder="Claude Agentに実行させたいタスクを入力してください..." required></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="resume_session_id">セッション再開 ID (オプション)</label>
+                        <input type="text" id="resume_session_id" name="resume_session_id" placeholder="既存セッションを再開したい場合はセッションIDを入力">
+                        <small style="color: #666;">※ 指定された場合、同一セッションIDで既存セッションを再開します</small>
+                    </div>
+
+                    <details class="advanced-options">
+                        <summary>高度なオプション</summary>
+
+                        <div class="form-group">
+                            <label for="permission_mode">許可モード</label>
+                            <select id="permission_mode" name="permission_mode">
+                                <option value="">デフォルト</option>
+                                <option value="acceptEdits">編集を自動承認</option>
+                                <option value="ask">毎回確認</option>
+                                <option value="deny">編集を拒否</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="model">モデル</label>
+                            <select id="model" name="model">
+                                <option value="">デフォルト</option>
+                                <option value="sonnet">Sonnet</option>
+                                <option value="opus">Opus</option>
+                                <option value="haiku">Haiku</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="system_prompt">システムプロンプト</label>
+                            <textarea id="system_prompt" name="system_prompt" placeholder="オプション: システムプロンプトを入力"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="max_turns">最大ターン数</label>
+                            <input type="number" id="max_turns" name="max_turns" min="1" placeholder="デフォルト: 無制限">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="cwd">作業ディレクトリ</label>
+                            <input type="text" id="cwd" name="cwd" placeholder="デフォルト: サーバーの現在のディレクトリ">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="allowed_tools">許可ツール (カンマ区切り)</label>
+                            <input type="text" id="allowed_tools" name="allowed_tools" placeholder="例: bash,read,write">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="disallowed_tools">禁止ツール (カンマ区切り)</label>
+                            <input type="text" id="disallowed_tools" name="disallowed_tools" placeholder="例: bash">
+                        </div>
+                    </details>
+
+                    <button type="submit" id="executeBtn">エージェントを実行</button>
+                    <button type="button" onclick="clearResumeId()" style="background-color: #6c757d;">新規セッション</button>
+                </form>
+
+                <div id="executeResponse" class="response-area" style="display: none;"></div>
+            </div>
+
+            <div class="container">
+                <h2>セッション状態確認</h2>
+                <div class="form-group">
+                    <label for="sessionId">セッション ID</label>
+                    <input type="text" id="sessionId" placeholder="セッションIDを入力">
+                </div>
+                <button onclick="checkStatus()">状態を確認</button>
+                <button onclick="cancelSession()" class="cancel-btn">セッションをキャンセル</button>
+
+                <div id="statusResponse" class="response-area" style="display: none;"></div>
+            </div>
+        </div>
+
+        <!-- 右カラム: アクティブセッション一覧 -->
+        <div>
+            <div class="container">
+                <h2>アクティブセッション一覧</h2>
+                <button onclick="loadSessions()">一覧を更新</button>
+                <button onclick="cleanupSessions()">完了セッションを削除</button>
+
+                <div id="sessionsList"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // APIのベースURLを定義
+        const API_BASE = 'http://localhost:8000';
+        let autoRefreshInterval = null;
+
+        // エージェント実行フォームの処理
+        document.getElementById('executeForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const formData = new FormData(e.target);
+            const requestData = {
+                prompt: formData.get('prompt')
+            };
+
+            // オプション項目の処理
+            if (formData.get('permission_mode')) requestData.permission_mode = formData.get('permission_mode');
+            if (formData.get('model')) requestData.model = formData.get('model');
+            if (formData.get('system_prompt')) requestData.system_prompt = formData.get('system_prompt');
+            if (formData.get('max_turns')) requestData.max_turns = parseInt(formData.get('max_turns'));
+            if (formData.get('cwd')) requestData.cwd = formData.get('cwd');
+            if (formData.get('resume_session_id')) requestData.resume_session_id = formData.get('resume_session_id');
+
+            // ツールリストの処理（カンマ区切り文字列を配列に変換）
+            if (formData.get('allowed_tools')) {
+                requestData.allowed_tools = formData.get('allowed_tools').split(',').map(s => s.trim()).filter(s => s);
+            }
+            if (formData.get('disallowed_tools')) {
+                requestData.disallowed_tools = formData.get('disallowed_tools').split(',').map(s => s.trim()).filter(s => s);
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/execute/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(requestData)
+                });
+
+                const result = await response.json();
+
+                const responseDiv = document.getElementById('executeResponse');
+                responseDiv.style.display = 'block';
+                responseDiv.textContent = JSON.stringify(result, null, 2);
+
+                if (result.session_id) {
+                    // ステータスチェック用のセッションIDを設定（resumeの場合は既に設定済み）
+                    if (!requestData.resume_session_id) {
+                        document.getElementById('sessionId').value = result.session_id;
+                    }
+                    
+                    // 自動でセッション一覧を更新
+                    setTimeout(loadSessions, 1000);
+                    
+                    // セッション再開の場合は自動でステータスをチェック
+                    if (requestData.resume_session_id) {
+                        setTimeout(() => {
+                            checkStatus();
+                            // 定期的にステータスをチェックして完了を待つ
+                            const statusCheckInterval = setInterval(() => {
+                                checkStatus();
+                                // セッション一覧も更新
+                                loadSessions();
+                            }, 3000);
+                            
+                            // 60秒後に自動チェックを停止
+                            setTimeout(() => {
+                                clearInterval(statusCheckInterval);
+                            }, 60000);
+                        }, 2000);
+                    }
+                }
+
+            } catch (error) {
+                const responseDiv = document.getElementById('executeResponse');
+                responseDiv.style.display = 'block';
+                responseDiv.textContent = `Error: ${error.message}`;
+            }
+        });
+
+        // セッション状態確認関数
+        async function checkStatus() {
+            const sessionId = document.getElementById('sessionId').value;
+            if (!sessionId) {
+                alert('セッションIDを入力してください');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/status/${sessionId}`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const result = await response.json();
+
+                const responseDiv = document.getElementById('statusResponse');
+                responseDiv.style.display = 'block';
+                responseDiv.textContent = JSON.stringify(result, null, 2);
+                
+                // ステータスが完了したらセッション一覧を更新
+                if (result.status === 'completed' || result.status === 'error' || result.status === 'cancelled') {
+                    setTimeout(loadSessions, 500);
+                }
+
+            } catch (error) {
+                const responseDiv = document.getElementById('statusResponse');
+                responseDiv.style.display = 'block';
+                responseDiv.textContent = `Error: ${error.message}`;
+                console.error('Status check error:', error);
+            }
+        }
+
+        // セッションキャンセル関数
+        async function cancelSession() {
+            const sessionId = document.getElementById('sessionId').value;
+            if (!sessionId) {
+                alert('セッションIDを入力してください');
+                return;
+            }
+
+            if (!confirm('このセッションをキャンセルしますか？')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/cancel/${sessionId}`, {
+                    method: 'POST'
+                });
+                const result = await response.json();
+
+                const responseDiv = document.getElementById('statusResponse');
+                responseDiv.style.display = 'block';
+                responseDiv.textContent = JSON.stringify(result, null, 2);
+
+                // セッション一覧を更新
+                setTimeout(loadSessions, 1000);
+
+            } catch (error) {
+                const responseDiv = document.getElementById('statusResponse');
+                responseDiv.style.display = 'block';
+                responseDiv.textContent = `Error: ${error.message}`;
+            }
+        }
+
+        // セッション一覧読み込み関数
+        async function loadSessions() {
+            try {
+                const response = await fetch(`${API_BASE}/sessions/`);
+                const sessions = await response.json();
+
+                const sessionsList = document.getElementById('sessionsList');
+                sessionsList.innerHTML = '';
+
+                if (sessions.length === 0) {
+                    sessionsList.innerHTML = '<p>アクティブなセッションはありません</p>';
+                    return;
+                }
+
+                sessions.forEach(session => {
+                    const sessionDiv = document.createElement('div');
+                    sessionDiv.className = 'session-item';
+
+                    // プロンプトが長い場合は省略表示
+                    const truncatedPrompt = session.prompt.length > 100
+                        ? session.prompt.substring(0, 100) + '...'
+                        : session.prompt;
+
+                    // ClaudeセッションIDの有無でresumeボタンを制御
+                    const hasClaudeSessionId = session.claude_session_id || (session.result && session.result.session_id);
+                    const resumeButtonDisabled = !hasClaudeSessionId || session.status === 'running';
+                    const resumeButtonStyle = resumeButtonDisabled ? 'background-color: #ccc; cursor: not-allowed;' : 'background-color: #17a2b8;';
+                    const resumeButtonOnClick = resumeButtonDisabled ? '' : `onclick="resumeSession('${session.session_id}')"`;
+
+                    sessionDiv.innerHTML = `
+                        <div class="session-header">
+                            <span class="session-id">${session.session_id}</span>
+                            <div>
+                                <button onclick="selectSession('${session.session_id}')" style="background-color: #28a745;">選択</button>
+                                <button ${resumeButtonOnClick} style="${resumeButtonStyle}" ${resumeButtonDisabled ? 'disabled' : ''}>再開</button>
+                                <button onclick="cancelSessionById('${session.session_id}')" class="cancel-btn">キャンセル</button>
+                            </div>
+                        </div>
+                        <div class="status-display status-${session.status}">
+                            Status: ${session.status}
+                        </div>
+                        <div><strong>Prompt:</strong> ${truncatedPrompt}</div>
+                        <div><strong>Created:</strong> ${new Date(session.created_at).toLocaleString()}</div>
+                        ${session.end_time ? `<div><strong>Completed:</strong> ${new Date(session.end_time).toLocaleString()}</div>` : ''}
+                        ${hasClaudeSessionId ? `<div><strong>Claude Session ID:</strong> <code>${session.claude_session_id || session.result.session_id}</code> <span style="color: green;">✓ Resume可能</span></div>` : '<div style="color: orange;">⚠ ClaudeセッションIDがまだ取得されていません</div>'}
+                        ${session.error ? `<div style="color: red;"><strong>Error:</strong> ${session.error}</div>` : ''}
+                    `;
+
+                    sessionsList.appendChild(sessionDiv);
+                });
+
+            } catch (error) {
+                document.getElementById('sessionsList').innerHTML = `<p style="color: red;">Error loading sessions: ${error.message}</p>`;
+            }
+        }
+
+        // セッション選択関数 - セッションIDをフィールドに設定して状態を確認
+        function selectSession(sessionId) {
+            document.getElementById('sessionId').value = sessionId;
+            checkStatus();
+        }
+
+        // セッション再開関数 - セッションIDを再開フィールドに設定
+        function resumeSession(sessionId) {
+            document.getElementById('resume_session_id').value = sessionId;
+            // ステータスチェック用のセッションIDも設定
+            document.getElementById('sessionId').value = sessionId;
+            // ボタンテキストを変更してわかりやすくする
+            const executeBtn = document.getElementById('executeBtn');
+            executeBtn.textContent = 'セッションを再開';
+            executeBtn.style.backgroundColor = '#28a745';
+        }
+
+        // 新規セッション用にresume IDをクリア
+        function clearResumeId() {
+            document.getElementById('resume_session_id').value = '';
+            // ステータスチェック用のセッションIDもクリア
+            document.getElementById('sessionId').value = '';
+            const executeBtn = document.getElementById('executeBtn');
+            executeBtn.textContent = 'エージェントを実行';
+            executeBtn.style.backgroundColor = '#007acc';
+        }
+
+        // セッションキャンセル関数（ID指定）
+        async function cancelSessionById(sessionId) {
+            if (!confirm(`セッション ${sessionId} をキャンセルしますか？`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/cancel/${sessionId}`, {
+                    method: 'POST'
+                });
+                const result = await response.json();
+
+                alert(`セッション ${sessionId} がキャンセルされました`);
+                loadSessions();
+
+            } catch (error) {
+                alert(`Error: ${error.message}`);
+            }
+        }
+
+        // セッションクリーンアップ関数 - 完了したセッションを削除
+        async function cleanupSessions() {
+            if (!confirm('完了したセッションを削除しますか？')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/sessions/cleanup?max_age_hours=0`, {
+                    method: 'DELETE'
+                });
+                const result = await response.json();
+
+                alert(`${result.removed} 個の完了セッションが削除されました`);
+                loadSessions();
+
+            } catch (error) {
+                alert(`Error: ${error.message}`);
+            }
+        }
+
+        // ページの初期読み込み処理
+        window.addEventListener('load', () => {
+            loadSessions();
+
+            // 自動更新を開始（10秒間隔）
+            autoRefreshInterval = setInterval(loadSessions, 10000);
+        });
+
+        // ページを離れるときに自動更新を停止
+        window.addEventListener('beforeunload', () => {
+            if (autoRefreshInterval) {
+                clearInterval(autoRefreshInterval);
+            }
+        });
+    </script>
+</body>
+</html>

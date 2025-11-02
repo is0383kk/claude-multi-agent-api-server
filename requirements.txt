@@ -1,0 +1,14 @@
+# Claude Agent SDK API Dependencies
+# Core web framework and server
+fastapi==0.115.0
+uvicorn[standard]==0.32.0
+
+# Data validation and modeling
+pydantic==2.9.2
+
+# Claude Agent SDK integration
+claude-agent-sdk==0.1.1
+
+# HTTP client for client examples
+requests>=2.28.0
+types-requests>=2.28.0
