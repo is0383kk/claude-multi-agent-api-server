@@ -1,8 +1,7 @@
 """
-Claude Agent SDK用のFastAPIアプリケーション
+FastAPI application for Claude Agent SDK
 
-このアプリケーションは、Claude Agent SDKをHTTPエンドポイント経由で
-非同期実行するためのWebサービスを提供します。
+Provides a web service for asynchronous execution of Claude Agent SDK via HTTP endpoints.
 """
 
 import os
@@ -21,88 +20,88 @@ from models import (
 )
 from session_manager import SessionManager
 
-# FastAPIアプリケーションの作成
+# Create FastAPI application
 app = FastAPI(
     title="Claude Agent SDK API",
-    description="セッション管理機能付きClaude Agent SDK実行API",
+    description="Claude Agent SDK execution API with session management",
     version="1.0.0",
 )
 
-# CORSミドルウェアの追加
-# 注意: 本番環境では具体的なオリジンを指定してください
+# Add CORS middleware
+# Note: Specify specific origins in production environment
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # 本番環境では実際のオリジンを指定
+    allow_origins=["*"],  # Specify actual origins in production
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# グローバルセッションマネージャー
-# アプリケーション全体でセッションの状態を管理
+# Global session manager
+# Manages session state across the entire application
 session_manager = SessionManager()
 
 
 @app.get("/")
 async def root():
-    """ルートエンドポイント - APIの基本情報を返却"""
+    """Root endpoint - Returns basic API information"""
     return {
         "message": "Claude Agent SDK API",
         "version": "1.0.0",
         "endpoints": {
-            "execute": "POST /execute/ - 新しいエージェントセッションを実行",
-            "status": "GET /status/{session_id} - セッションの状態を取得",
-            "cancel": "POST /cancel/{session_id} - 実行中のセッションをキャンセル",
+            "execute": "POST /execute/ - Execute a new agent session",
+            "status": "GET /status/{session_id} - Get session status",
+            "cancel": "POST /cancel/{session_id} - Cancel a running session",
         },
     }
 
 
 def _build_agent_options(request: ExecuteRequest) -> ClaudeAgentOptions:
     """
-    ExecuteRequestからClaudeAgentOptionsを構築する
+    Build ClaudeAgentOptions from ExecuteRequest
 
     Args:
-        request: エージェントの設定を含む実行リクエスト
+        request: Execution request containing agent configuration
 
     Returns:
-        リクエストパラメータで設定されたClaudeAgentOptions
+        ClaudeAgentOptions configured with request parameters
     """
 
     options_dict: Dict[str, Any] = {}
 
-    # 作業ディレクトリ：リクエストのcwdを使用、無い場合は現在のディレクトリを使用
+    # Working directory: Use request cwd, or current directory if not provided
     options_dict["cwd"] = request.cwd or os.getcwd()
 
-    # ツールの設定（許可）
+    # Tool configuration (allowed)
     if request.allowed_tools is not None:
         options_dict["allowed_tools"] = _ensure_list(request.allowed_tools)
 
-    # ツールの設定（不許可）
+    # Tool configuration (disallowed)
     if request.disallowed_tools is not None:
         options_dict["disallowed_tools"] = _ensure_list(request.disallowed_tools)
 
-    # システムプロンプト
+    # System prompt
     if request.system_prompt is not None:
         options_dict["system_prompt"] = request.system_prompt
 
-    # 許可モード
+    # Permission mode
     if request.permission_mode is not None:
         if hasattr(request.permission_mode, "value"):
-            # enumの場合は値を抽出
+            # Extract value for enum case
             options_dict["permission_mode"] = request.permission_mode.value
         else:
-            # 文字列の場合
+            # String case
             options_dict["permission_mode"] = request.permission_mode
 
-    # モデルの設定
+    # Model configuration
     if request.model is not None:
         options_dict["model"] = request.model
 
-    # ターン数の制限
+    # Turn limit
     if request.max_turns is not None:
         options_dict["max_turns"] = request.max_turns
 
-    # 環境変数
+    # Environment variables
     if request.env is not None:
         options_dict["env"] = request.env
 
@@ -111,51 +110,51 @@ def _build_agent_options(request: ExecuteRequest) -> ClaudeAgentOptions:
 
 def _ensure_list(value) -> list:
     """
-    mypyチェック用
-    値がリストであることを保証し、単一値を単一要素のリストに変換する
+    For mypy checking
+    Ensures the value is a list and converts single values to single-element lists
 
     Args:
-        value: リストに変換する値（文字列、リスト、またはその他の反復可能なオブジェクト）
+        value: Value to convert to list (string, list, or other iterable object)
 
     Returns:
-        値を含むリスト
+        List containing the value(s)
     """
     if isinstance(value, str):
         return [value]
     elif isinstance(value, list):
         return value
     else:
-        # 反復可能なオブジェクトをリストに変換を試みる
+        # Try to convert iterable object to list
         try:
             return list(value)
         except TypeError:
-            # 反復可能でない場合はリストでラップ
+            # If not iterable, wrap in list
             return [value]
 
 
 @app.post("/execute/", response_model=ExecuteResponse)
 async def execute_agent(request: ExecuteRequest):
     """
-    新しいClaudeエージェントセッションを実行
+    Execute a new Claude agent session
     or
-    セッションIDを指定して既存のセッションを再開する
+    Resume an existing session by specifying a session ID
 
     Args:
-        request: プロンプト、オプション、およびオプションのresume_session_idを含む実行リクエスト
+        request: Execution request containing prompt, options, and optional resume_session_id
 
     Returns:
-        session_idとstatusを含むExecuteResponse
+        ExecuteResponse containing session_id and status
     """
     try:
-        # リクエストからClaudeAgentOptionsを構築
+        # Build ClaudeAgentOptions from request
         agent_options = _build_agent_options(request)
 
-        # セッションを作成または再開
+        # Create or resume session
         session = await session_manager.create_session(
             request.prompt, agent_options, request.resume_session_id
         )
 
-        # メッセージを適切に設定
+        # Set message for new/resumed session
         if request.resume_session_id:
             message = f"Session {session.session_id} resumed successfully"
         else:
@@ -168,7 +167,7 @@ async def execute_agent(request: ExecuteRequest):
         )
 
     except ValueError as e:
-        # セッション再開エラーの場合
+        # For session resume errors
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         raise HTTPException(
@@ -178,16 +177,16 @@ async def execute_agent(request: ExecuteRequest):
 
 @app.get("/status/{session_id}", response_model=StatusResponse)
 async def get_status(
-    session_id: str = Path(..., description="ステータス取得の対象となるセッションID"),
+    session_id: str = Path(..., description="Session ID to get status for"),
 ):
     """
-    セッションの状態を取得する
+    Get session status
 
     Args:
-        session_id: 照会するセッションID
+        session_id: Session ID to query
 
     Returns:
-        セッションの状態とメッセージを含むStatusResponse
+        StatusResponse containing session status and messages
     """
     session = await session_manager.get_session(session_id)
 
@@ -202,31 +201,34 @@ async def get_status(
         error=session.error,
         duration_ms=session.get_duration_ms(),
         total_cost_usd=(
-            session.result.get("total_cost_usd") if session.result and isinstance(session.result, dict) else None
+            session.result.get("total_cost_usd")
+            if session.result and isinstance(session.result, dict)
+            else None
         ),
     )
 
 
 @app.post("/cancel/{session_id}", response_model=CancelResponse)
 async def cancel_session(
-    session_id: str = Path(..., description="キャンセルするセッションID"),
+    session_id: str = Path(..., description="Session ID to cancel"),
 ):
     """
-    実行中のセッションをキャンセルする
+    Cancel a running session
 
     Args:
-        session_id: キャンセルするセッションID
+        session_id: Session ID to cancel
 
     Returns:
-        更新された状態を含むCancelResponse
+        CancelResponse containing updated status
     """
-    # セッションIDからセッションを取得
+    # Get session from session ID
     session = await session_manager.get_session(session_id)
 
     if not session:
-        # セッションが存在しない場合は404エラーを返す
+        # Return 404 error if session doesn't exist
         raise HTTPException(status_code=404, detail=f"Session {session_id} not found")
 
+    # Return 400 error if session is not running
     if session.status != SessionStatus.RUNNING:
         raise HTTPException(
             status_code=400,
@@ -250,10 +252,10 @@ async def cancel_session(
 @app.get("/sessions/")
 async def list_sessions():
     """
-    すべてのセッションを詳細情報付きで一覧表示する
+    List all sessions with detailed information
 
     Returns:
-        セッション詳細情報のリスト
+        List of session detailed information
     """
     sessions = await session_manager.get_all_sessions()
     return sessions
@@ -262,13 +264,13 @@ async def list_sessions():
 @app.delete("/sessions/cleanup")
 async def cleanup_sessions(max_age_hours: int = 24):
     """
-    古いセッションをクリーンアップする
+    Clean up old sessions
 
     Args:
-        max_age_hours: 保持するセッションの最大経過時間（デフォルト: 24時間）
+        max_age_hours: Maximum age of sessions to keep (default: 24 hours)
 
     Returns:
-        クリーンアップしたセッション数
+        Number of cleaned up sessions
     """
     removed = await session_manager.cleanup_old_sessions(max_age_hours)
     return {"removed": removed, "message": f"Cleaned up {removed} old sessions"}

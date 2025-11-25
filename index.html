@@ -1,27 +1,49 @@
 <!DOCTYPE html>
 <!--
-Claude Agent SDK APIテストインターフェース
+Claude Agent SDK API Test Interface
 
-このHTMLファイルは、Claude Agent SDK APIをブラウザでテストするための
-Webインターフェースを提供します。エージェントの実行、状態監視、
-セッション管理などの機能をGUIで操作できます。
+This HTML file provides a web interface for testing the Claude Agent SDK API.
+It allows GUI operations for agent execution, status monitoring, session management, and more.
 -->
-<html lang="ja">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Claude Agent SDK - テストインターフェース</title>
+    <title data-lang-key="page_title">Claude Agent SDK - Test Interface</title>
     <style>
-        /* 基本スタイル - ページ全体のレイアウトとフォント設定 */
+        /* Basic styles - Page layout and font settings */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
             background-color: #f5f5f5;
+            position: relative;
         }
 
-        /* コンテナースタイル - 各セクションの背景と陰影 */
+        /* Language toggle button - Fixed position in top-right corner */
+        .language-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background-color: #007acc;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            padding: 8px 16px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+            transition: background-color 0.3s ease;
+        }
+
+        .language-toggle:hover {
+            background-color: #005a9e;
+        }
+
+        /* Container styles - Background and shadow for each section */
         .container {
             background: white;
             border-radius: 8px;
@@ -30,14 +52,14 @@ Webインターフェースを提供します。エージェントの実行、�
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
-        /* ヘッダースタイル - タイトルとセクションヘッダー */
+        /* Header styles - Title and section headers */
         h1, h2 {
             color: #333;
             border-bottom: 2px solid #007acc;
             padding-bottom: 10px;
         }
 
-        /* フォームスタイル - 入力フィールドとラベル */
+        /* Form styles - Input fields and labels */
         .form-group {
             margin-bottom: 15px;
         }
@@ -49,7 +71,7 @@ Webインターフェースを提供します。エージェントの実行、�
             color: #555;
         }
 
-        /* 入力フィールドの共通スタイル */
+        /* Common styles for input fields */
         input, textarea, select {
             width: 100%;
             padding: 8px 12px;
@@ -59,13 +81,13 @@ Webインターフェースを提供します。エージェントの実行、�
             box-sizing: border-box;
         }
 
-        /* テキストエリアのサイズ設定 */
+        /* Textarea size settings */
         textarea {
             min-height: 100px;
             resize: vertical;
         }
 
-        /* ボタンの基本スタイル */
+        /* Basic button styles */
         button {
             background-color: #007acc;
             color: white;
@@ -78,7 +100,7 @@ Webインターフェースを提供します。エージェントの実行、�
             margin-bottom: 10px;
         }
 
-        /* ボタンのホバーと無効状態 */
+        /* Button hover and disabled states */
         button:hover {
             background-color: #005a9e;
         }
@@ -88,7 +110,7 @@ Webインターフェースを提供します。エージェントの実行、�
             cursor: not-allowed;
         }
 
-        /* キャンセルボタンのスタイル */
+        /* Cancel button styles */
         .cancel-btn {
             background-color: #dc3545;
         }
@@ -97,20 +119,20 @@ Webインターフェースを提供します。エージェントの実行、�
             background-color: #c82333;
         }
 
-        /* ステータス表示のスタイル - 状態に応じた色分け */
+        /* Status display styles - Color coding by state */
         .status-display {
             padding: 10px;
             border-radius: 4px;
             margin: 10px 0;
         }
 
-        .status-pending { background-color: #fff3cd; color: #856404; } /* 待機中 */
-        .status-running { background-color: #d1ecf1; color: #0c5460; } /* 実行中 */
-        .status-completed { background-color: #d4edda; color: #155724; } /* 完了 */
-        .status-error { background-color: #f8d7da; color: #721c24; } /* エラー */
-        .status-cancelled { background-color: #e2e3e5; color: #383d41; } /* キャンセル */
+        .status-pending { background-color: #fff3cd; color: #856404; } /* Pending */
+        .status-running { background-color: #d1ecf1; color: #0c5460; } /* Running */
+        .status-completed { background-color: #d4edda; color: #155724; } /* Completed */
+        .status-error { background-color: #f8d7da; color: #721c24; } /* Error */
+        .status-cancelled { background-color: #e2e3e5; color: #383d41; } /* Cancelled */
 
-        /* レスポンス表示エリア - APIレスポンスのJSON表示用 */
+        /* Response display area - For displaying API response JSON */
         .response-area {
             background-color: #f8f9fa;
             border: 1px solid #e9ecef;
@@ -122,7 +144,7 @@ Webインターフェースを提供します。エージェントの実行、�
             font-size: 12px;
         }
 
-        /* セッションアイテムのスタイル */
+        /* Session item styles */
         .session-item {
             border: 1px solid #ddd;
             border-radius: 4px;
@@ -143,7 +165,7 @@ Webインターフェースを提供します。エージェントの実行、�
             font-weight: bold;
         }
 
-        /* レスポンシブルデザイン - 2列レイアウト */
+        /* Responsive design - Two-column layout */
         .two-column {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -154,9 +176,19 @@ Webインターフェースを提供します。エージェントの実行、�
             .two-column {
                 grid-template-columns: 1fr;
             }
+
+            .language-toggle {
+                position: relative;
+                top: 0;
+                right: 0;
+                margin-bottom: 20px;
+                display: block;
+                width: fit-content;
+                margin-left: auto;
+            }
         }
 
-        /* 高度なオプションセクション - 折りたたみ可能 */
+        /* Advanced options section - Collapsible */
         .advanced-options {
             border: 1px solid #ddd;
             border-radius: 4px;
@@ -173,42 +205,45 @@ Webインターフェースを提供します。エージェントの実行、�
     </style>
 </head>
 <body>
-    <h1>Claude Agent SDK テストインターフェース</h1>
+    <!-- Language toggle button -->
+    <button class="language-toggle" onclick="toggleLanguage()" id="languageToggle">日本語</button>
+
+    <h1 data-lang-key="main_title">Claude Agent SDK Test Interface</h1>
 
     <div class="two-column">
-        <!-- 左カラム: エージェント実行フォーム -->
+        <!-- Left column: Agent execution form -->
         <div>
             <div class="container">
-                <h2>エージェント実行</h2>
+                <h2 data-lang-key="execute_agent">Execute Agent</h2>
                 <form id="executeForm">
                     <div class="form-group">
-                        <label for="prompt">プロンプト *</label>
-                        <textarea id="prompt" name="prompt" placeholder="Claude Agentに実行させたいタスクを入力してください..." required></textarea>
+                        <label for="prompt" data-lang-key="prompt_label">Prompt *</label>
+                        <textarea id="prompt" name="prompt" data-lang-key="prompt_placeholder" placeholder="Enter the task you want Claude Agent to execute..." required></textarea>
                     </div>
 
                     <div class="form-group">
-                        <label for="resume_session_id">セッション再開 ID (オプション)</label>
-                        <input type="text" id="resume_session_id" name="resume_session_id" placeholder="既存セッションを再開したい場合はセッションIDを入力">
-                        <small style="color: #666;">※ 指定された場合、同一セッションIDで既存セッションを再開します</small>
+                        <label for="resume_session_id" data-lang-key="resume_session_label">Resume Session ID (Optional)</label>
+                        <input type="text" id="resume_session_id" name="resume_session_id" data-lang-key="resume_session_placeholder" placeholder="Enter session ID if you want to resume an existing session">
+                        <small style="color: #666;" data-lang-key="resume_session_note">※ If specified, resumes the existing session with the same session ID</small>
                     </div>
 
                     <details class="advanced-options">
-                        <summary>高度なオプション</summary>
+                        <summary data-lang-key="advanced_options">Advanced Options</summary>
 
                         <div class="form-group">
-                            <label for="permission_mode">許可モード</label>
+                            <label for="permission_mode" data-lang-key="permission_mode_label">Permission Mode</label>
                             <select id="permission_mode" name="permission_mode">
-                                <option value="">デフォルト</option>
-                                <option value="acceptEdits">編集を自動承認</option>
-                                <option value="ask">毎回確認</option>
-                                <option value="deny">編集を拒否</option>
+                                <option value="" data-lang-key="permission_default">Default</option>
+                                <option value="acceptEdits" data-lang-key="permission_accept">Auto-accept edits</option>
+                                <option value="ask" data-lang-key="permission_ask">Ask every time</option>
+                                <option value="deny" data-lang-key="permission_deny">Deny edits</option>
                             </select>
                         </div>
 
                         <div class="form-group">
-                            <label for="model">モデル</label>
+                            <label for="model" data-lang-key="model_label">Model</label>
                             <select id="model" name="model">
-                                <option value="">デフォルト</option>
+                                <option value="" data-lang-key="model_default">Default</option>
                                 <option value="sonnet">Sonnet</option>
                                 <option value="opus">Opus</option>
                                 <option value="haiku">Haiku</option>
@@ -216,57 +251,57 @@ Webインターフェースを提供します。エージェントの実行、�
                         </div>
 
                         <div class="form-group">
-                            <label for="system_prompt">システムプロンプト</label>
-                            <textarea id="system_prompt" name="system_prompt" placeholder="オプション: システムプロンプトを入力"></textarea>
+                            <label for="system_prompt" data-lang-key="system_prompt_label">System Prompt</label>
+                            <textarea id="system_prompt" name="system_prompt" data-lang-key="system_prompt_placeholder" placeholder="Optional: Enter system prompt"></textarea>
                         </div>
 
                         <div class="form-group">
-                            <label for="max_turns">最大ターン数</label>
-                            <input type="number" id="max_turns" name="max_turns" min="1" placeholder="デフォルト: 無制限">
+                            <label for="max_turns" data-lang-key="max_turns_label">Max Turns</label>
+                            <input type="number" id="max_turns" name="max_turns" min="1" data-lang-key="max_turns_placeholder" placeholder="Default: Unlimited">
                         </div>
 
                         <div class="form-group">
-                            <label for="cwd">作業ディレクトリ</label>
-                            <input type="text" id="cwd" name="cwd" placeholder="デフォルト: サーバーの現在のディレクトリ">
+                            <label for="cwd" data-lang-key="cwd_label">Working Directory</label>
+                            <input type="text" id="cwd" name="cwd" data-lang-key="cwd_placeholder" placeholder="Default: Server's current directory">
                         </div>
 
                         <div class="form-group">
-                            <label for="allowed_tools">許可ツール (カンマ区切り)</label>
-                            <input type="text" id="allowed_tools" name="allowed_tools" placeholder="例: bash,read,write">
+                            <label for="allowed_tools" data-lang-key="allowed_tools_label">Allowed Tools (comma-separated)</label>
+                            <input type="text" id="allowed_tools" name="allowed_tools" data-lang-key="allowed_tools_placeholder" placeholder="e.g: bash,read,write">
                         </div>
 
                         <div class="form-group">
-                            <label for="disallowed_tools">禁止ツール (カンマ区切り)</label>
-                            <input type="text" id="disallowed_tools" name="disallowed_tools" placeholder="例: bash">
+                            <label for="disallowed_tools" data-lang-key="disallowed_tools_label">Disallowed Tools (comma-separated)</label>
+                            <input type="text" id="disallowed_tools" name="disallowed_tools" data-lang-key="disallowed_tools_placeholder" placeholder="e.g: bash">
                         </div>
                     </details>
 
-                    <button type="submit" id="executeBtn">エージェントを実行</button>
-                    <button type="button" onclick="clearResumeId()" style="background-color: #6c757d;">新規セッション</button>
+                    <button type="submit" id="executeBtn" data-lang-key="execute_button">Execute Agent</button>
+                    <button type="button" onclick="clearResumeId()" style="background-color: #6c757d;" data-lang-key="new_session_button">New Session</button>
                 </form>
 
                 <div id="executeResponse" class="response-area" style="display: none;"></div>
             </div>
 
             <div class="container">
-                <h2>セッション状態確認</h2>
+                <h2 data-lang-key="session_status">Session Status Check</h2>
                 <div class="form-group">
-                    <label for="sessionId">セッション ID</label>
-                    <input type="text" id="sessionId" placeholder="セッションIDを入力">
+                    <label for="sessionId" data-lang-key="session_id_label">Session ID</label>
+                    <input type="text" id="sessionId" data-lang-key="session_id_placeholder" placeholder="Enter session ID">
                 </div>
-                <button onclick="checkStatus()">状態を確認</button>
-                <button onclick="cancelSession()" class="cancel-btn">セッションをキャンセル</button>
+                <button onclick="checkStatus()" data-lang-key="check_status_button">Check Status</button>
+                <button onclick="cancelSession()" class="cancel-btn" data-lang-key="cancel_session_button">Cancel Session</button>
 
                 <div id="statusResponse" class="response-area" style="display: none;"></div>
             </div>
         </div>
 
-        <!-- 右カラム: アクティブセッション一覧 -->
+        <!-- Right column: Active sessions list -->
         <div>
             <div class="container">
-                <h2>アクティブセッション一覧</h2>
-                <button onclick="loadSessions()">一覧を更新</button>
-                <button onclick="cleanupSessions()">完了セッションを削除</button>
+                <h2 data-lang-key="active_sessions">Active Sessions List</h2>
+                <button onclick="loadSessions()" data-lang-key="refresh_list_button">Refresh List</button>
+                <button onclick="cleanupSessions()" data-lang-key="cleanup_sessions_button">Delete Completed Sessions</button>
 
                 <div id="sessionsList"></div>
             </div>
@@ -274,11 +309,177 @@ Webインターフェースを提供します。エージェントの実行、�
     </div>
 
     <script>
-        // APIのベースURLを定義
+        // Language translations
+        const translations = {
+            en: {
+                page_title: "Claude Agent SDK - Test Interface",
+                main_title: "Claude Agent SDK Test Interface",
+                execute_agent: "Execute Agent",
+                prompt_label: "Prompt *",
+                prompt_placeholder: "Enter the task you want Claude Agent to execute...",
+                resume_session_label: "Resume Session ID (Optional)",
+                resume_session_placeholder: "Enter session ID if you want to resume an existing session",
+                resume_session_note: "※ If specified, resumes the existing session with the same session ID",
+                advanced_options: "Advanced Options",
+                permission_mode_label: "Permission Mode",
+                permission_default: "Default",
+                permission_accept: "Auto-accept edits",
+                permission_ask: "Ask every time",
+                permission_deny: "Deny edits",
+                model_label: "Model",
+                model_default: "Default",
+                system_prompt_label: "System Prompt",
+                system_prompt_placeholder: "Optional: Enter system prompt",
+                max_turns_label: "Max Turns",
+                max_turns_placeholder: "Default: Unlimited",
+                cwd_label: "Working Directory",
+                cwd_placeholder: "Default: Server's current directory",
+                allowed_tools_label: "Allowed Tools (comma-separated)",
+                allowed_tools_placeholder: "e.g: bash,read,write",
+                disallowed_tools_label: "Disallowed Tools (comma-separated)",
+                disallowed_tools_placeholder: "e.g: bash",
+                execute_button: "Execute Agent",
+                new_session_button: "New Session",
+                session_status: "Session Status Check",
+                session_id_label: "Session ID",
+                session_id_placeholder: "Enter session ID",
+                check_status_button: "Check Status",
+                cancel_session_button: "Cancel Session",
+                active_sessions: "Active Sessions List",
+                refresh_list_button: "Refresh List",
+                cleanup_sessions_button: "Delete Completed Sessions",
+                no_active_sessions: "No active sessions",
+                select_button: "Select",
+                resume_button: "Resume",
+                cancel_button: "Cancel",
+                status_label: "Status",
+                prompt_display: "Prompt",
+                created_label: "Created",
+                completed_label: "Completed",
+                claude_session_id_label: "Claude Session ID",
+                resume_available: "✓ Resume available",
+                claude_session_warning: "⚠ Claude session ID not yet obtained",
+                error_label: "Error",
+                confirm_cancel: "Cancel this session?",
+                confirm_cancel_by_id: "Cancel session {sessionId}?",
+                session_cancelled: "Session {sessionId} has been cancelled",
+                confirm_cleanup: "Delete completed sessions?",
+                sessions_deleted: "{count} completed sessions were deleted",
+                enter_session_id: "Please enter a session ID",
+                resume_session_text: "Resume Session",
+                execute_agent_text: "Execute Agent"
+            },
+            ja: {
+                page_title: "Claude Agent SDK - テストインターフェース",
+                main_title: "Claude Agent SDK テストインターフェース",
+                execute_agent: "エージェント実行",
+                prompt_label: "プロンプト *",
+                prompt_placeholder: "Claude Agentに実行させたいタスクを入力してください...",
+                resume_session_label: "セッション再開 ID (オプション)",
+                resume_session_placeholder: "既存セッションを再開したい場合はセッションIDを入力",
+                resume_session_note: "※ 指定された場合、同一セッションIDで既存セッションを再開します",
+                advanced_options: "高度なオプション",
+                permission_mode_label: "許可モード",
+                permission_default: "デフォルト",
+                permission_accept: "編集を自動承認",
+                permission_ask: "毎回確認",
+                permission_deny: "編集を拒否",
+                model_label: "モデル",
+                model_default: "デフォルト",
+                system_prompt_label: "システムプロンプト",
+                system_prompt_placeholder: "オプション: システムプロンプトを入力",
+                max_turns_label: "最大ターン数",
+                max_turns_placeholder: "デフォルト: 無制限",
+                cwd_label: "作業ディレクトリ",
+                cwd_placeholder: "デフォルト: サーバーの現在のディレクトリ",
+                allowed_tools_label: "許可ツール (カンマ区切り)",
+                allowed_tools_placeholder: "例: bash,read,write",
+                disallowed_tools_label: "禁止ツール (カンマ区切り)",
+                disallowed_tools_placeholder: "例: bash",
+                execute_button: "エージェントを実行",
+                new_session_button: "新規セッション",
+                session_status: "セッション状態確認",
+                session_id_label: "セッション ID",
+                session_id_placeholder: "セッションIDを入力",
+                check_status_button: "状態を確認",
+                cancel_session_button: "セッションをキャンセル",
+                active_sessions: "アクティブセッション一覧",
+                refresh_list_button: "一覧を更新",
+                cleanup_sessions_button: "完了セッションを削除",
+                no_active_sessions: "アクティブなセッションはありません",
+                select_button: "選択",
+                resume_button: "再開",
+                cancel_button: "キャンセル",
+                status_label: "Status",
+                prompt_display: "Prompt",
+                created_label: "Created",
+                completed_label: "Completed",
+                claude_session_id_label: "Claude Session ID",
+                resume_available: "✓ Resume可能",
+                claude_session_warning: "⚠ ClaudeセッションIDがまだ取得されていません",
+                error_label: "Error",
+                confirm_cancel: "このセッションをキャンセルしますか？",
+                confirm_cancel_by_id: "セッション {sessionId} をキャンセルしますか？",
+                session_cancelled: "セッション {sessionId} がキャンセルされました",
+                confirm_cleanup: "完了したセッションを削除しますか？",
+                sessions_deleted: "{count} 個の完了セッションが削除されました",
+                enter_session_id: "セッションIDを入力してください",
+                resume_session_text: "セッションを再開",
+                execute_agent_text: "エージェントを実行"
+            }
+        };
+
+        // Current language (default to English)
+        let currentLanguage = localStorage.getItem('claude-interface-language') || 'en';
+
+        // Apply language on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            applyLanguage(currentLanguage);
+            updateLanguageToggle();
+        });
+
+        // Toggle language function
+        function toggleLanguage() {
+            currentLanguage = currentLanguage === 'en' ? 'ja' : 'en';
+            localStorage.setItem('claude-interface-language', currentLanguage);
+            applyLanguage(currentLanguage);
+            updateLanguageToggle();
+        }
+
+        // Apply language to all elements
+        function applyLanguage(lang) {
+            const elements = document.querySelectorAll('[data-lang-key]');
+            elements.forEach(element => {
+                const key = element.getAttribute('data-lang-key');
+                if (translations[lang] && translations[lang][key]) {
+                    if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA') {
+                        if (element.type === 'text' || element.tagName === 'TEXTAREA') {
+                            element.placeholder = translations[lang][key];
+                        }
+                    } else {
+                        element.textContent = translations[lang][key];
+                    }
+                }
+            });
+
+            // Update HTML lang attribute
+            document.documentElement.lang = lang;
+
+            // Update page title
+            document.title = translations[lang]['page_title'] || document.title;
+        }
+
+        // Update language toggle button text
+        function updateLanguageToggle() {
+            const toggleButton = document.getElementById('languageToggle');
+            toggleButton.textContent = currentLanguage === 'en' ? '日本語' : 'English';
+        }
+
+        // API base URL definition
         const API_BASE = 'http://localhost:8000';
         let autoRefreshInterval = null;
 
-        // エージェント実行フォームの処理
+        // Agent execution form processing
         document.getElementById('executeForm').addEventListener('submit', async (e) => {
             e.preventDefault();
 
@@ -287,7 +488,7 @@ Webインターフェースを提供します。エージェントの実行、�
                 prompt: formData.get('prompt')
             };
 
-            // オプション項目の処理
+            // Optional items processing
             if (formData.get('permission_mode')) requestData.permission_mode = formData.get('permission_mode');
             if (formData.get('model')) requestData.model = formData.get('model');
             if (formData.get('system_prompt')) requestData.system_prompt = formData.get('system_prompt');
@@ -295,7 +496,7 @@ Webインターフェースを提供します。エージェントの実行、�
             if (formData.get('cwd')) requestData.cwd = formData.get('cwd');
             if (formData.get('resume_session_id')) requestData.resume_session_id = formData.get('resume_session_id');
 
-            // ツールリストの処理（カンマ区切り文字列を配列に変換）
+            // Tool list processing (convert comma-separated string to array)
             if (formData.get('allowed_tools')) {
                 requestData.allowed_tools = formData.get('allowed_tools').split(',').map(s => s.trim()).filter(s => s);
             }
@@ -319,26 +520,26 @@ Webインターフェースを提供します。エージェントの実行、�
                 responseDiv.textContent = JSON.stringify(result, null, 2);
 
                 if (result.session_id) {
-                    // ステータスチェック用のセッションIDを設定（resumeの場合は既に設定済み）
+                    // Set session ID for status check (already set if resuming)
                     if (!requestData.resume_session_id) {
                         document.getElementById('sessionId').value = result.session_id;
                     }
 
-                    // 自動でセッション一覧を更新
+                    // Automatically refresh session list
                     setTimeout(loadSessions, 1000);
 
-                    // セッション再開の場合は自動でステータスをチェック
+                    // Automatically check status if resuming session
                     if (requestData.resume_session_id) {
                         setTimeout(() => {
                             checkStatus();
-                            // 定期的にステータスをチェックして完了を待つ
+                            // Periodically check status and wait for completion
                             const statusCheckInterval = setInterval(() => {
                                 checkStatus();
-                                // セッション一覧も更新
+                                // Also update session list
                                 loadSessions();
                             }, 3000);
 
-                            // 60秒後に自動チェックを停止
+                            // Stop automatic checking after 60 seconds
                             setTimeout(() => {
                                 clearInterval(statusCheckInterval);
                             }, 60000);
@@ -353,11 +554,11 @@ Webインターフェースを提供します。エージェントの実行、�
             }
         });
 
-        // セッション状態確認関数
+        // Session status check function
         async function checkStatus() {
             const sessionId = document.getElementById('sessionId').value;
             if (!sessionId) {
-                alert('セッションIDを入力してください');
+                alert(translations[currentLanguage]['enter_session_id']);
                 return;
             }
 
@@ -374,7 +575,7 @@ Webインターフェースを提供します。エージェントの実行、�
                 responseDiv.style.display = 'block';
                 responseDiv.textContent = JSON.stringify(result, null, 2);
 
-                // ステータスが完了したらセッション一覧を更新
+                // Update session list when status is complete
                 if (result.status === 'completed' || result.status === 'error' || result.status === 'cancelled') {
                     setTimeout(loadSessions, 500);
                 }
@@ -387,15 +588,15 @@ Webインターフェースを提供します。エージェントの実行、�
             }
         }
 
-        // セッションキャンセル関数
+        // Session cancel function
         async function cancelSession() {
             const sessionId = document.getElementById('sessionId').value;
             if (!sessionId) {
-                alert('セッションIDを入力してください');
+                alert(translations[currentLanguage]['enter_session_id']);
                 return;
             }
 
-            if (!confirm('このセッションをキャンセルしますか？')) {
+            if (!confirm(translations[currentLanguage]['confirm_cancel'])) {
                 return;
             }
 
@@ -409,7 +610,7 @@ Webインターフェースを提供します。エージェントの実行、�
                 responseDiv.style.display = 'block';
                 responseDiv.textContent = JSON.stringify(result, null, 2);
 
-                // セッション一覧を更新
+                // Update session list
                 setTimeout(loadSessions, 1000);
 
             } catch (error) {
@@ -419,7 +620,7 @@ Webインターフェースを提供します。エージェントの実行、�
             }
         }
 
-        // セッション一覧読み込み関数
+        // Session list loading function
         async function loadSessions() {
             try {
                 const response = await fetch(`${API_BASE}/sessions/`);
@@ -429,7 +630,7 @@ Webインターフェースを提供します。エージェントの実行、�
                 sessionsList.innerHTML = '';
 
                 if (sessions.length === 0) {
-                    sessionsList.innerHTML = '<p>アクティブなセッションはありません</p>';
+                    sessionsList.innerHTML = `<p>${translations[currentLanguage]['no_active_sessions']}</p>`;
                     return;
                 }
 
@@ -437,12 +638,12 @@ Webインターフェースを提供します。エージェントの実行、�
                     const sessionDiv = document.createElement('div');
                     sessionDiv.className = 'session-item';
 
-                    // プロンプトが長い場合は省略表示
+                    // Truncate prompt if too long
                     const truncatedPrompt = session.prompt.length > 100
                         ? session.prompt.substring(0, 100) + '...'
                         : session.prompt;
 
-                    // ClaudeセッションIDの有無でresumeボタンを制御
+                    // Control resume button based on Claude session ID availability
                     const hasClaudeSessionId = session.claude_session_id || (session.result && session.result.session_id);
                     const resumeButtonDisabled = !hasClaudeSessionId || session.status === 'running';
                     const resumeButtonStyle = resumeButtonDisabled ? 'background-color: #ccc; cursor: not-allowed;' : 'background-color: #17a2b8;';
@@ -452,19 +653,19 @@ Webインターフェースを提供します。エージェントの実行、�
                         <div class="session-header">
                             <span class="session-id">${session.session_id}</span>
                             <div>
-                                <button onclick="selectSession('${session.session_id}')" style="background-color: #28a745;">選択</button>
-                                <button ${resumeButtonOnClick} style="${resumeButtonStyle}" ${resumeButtonDisabled ? 'disabled' : ''}>再開</button>
-                                <button onclick="cancelSessionById('${session.session_id}')" class="cancel-btn">キャンセル</button>
+                                <button onclick="selectSession('${session.session_id}')" style="background-color: #28a745;">${translations[currentLanguage]['select_button']}</button>
+                                <button ${resumeButtonOnClick} style="${resumeButtonStyle}" ${resumeButtonDisabled ? 'disabled' : ''}>${translations[currentLanguage]['resume_button']}</button>
+                                <button onclick="cancelSessionById('${session.session_id}')" class="cancel-btn">${translations[currentLanguage]['cancel_button']}</button>
                             </div>
                         </div>
                         <div class="status-display status-${session.status}">
-                            Status: ${session.status}
+                            ${translations[currentLanguage]['status_label']}: ${session.status}
                         </div>
-                        <div><strong>Prompt:</strong> ${truncatedPrompt}</div>
-                        <div><strong>Created:</strong> ${new Date(session.created_at).toLocaleString()}</div>
-                        ${session.end_time ? `<div><strong>Completed:</strong> ${new Date(session.end_time).toLocaleString()}</div>` : ''}
-                        ${hasClaudeSessionId ? `<div><strong>Claude Session ID:</strong> <code>${session.claude_session_id || session.result.session_id}</code> <span style="color: green;">✓ Resume可能</span></div>` : '<div style="color: orange;">⚠ ClaudeセッションIDがまだ取得されていません</div>'}
-                        ${session.error ? `<div style="color: red;"><strong>Error:</strong> ${session.error}</div>` : ''}
+                        <div><strong>${translations[currentLanguage]['prompt_display']}:</strong> ${truncatedPrompt}</div>
+                        <div><strong>${translations[currentLanguage]['created_label']}:</strong> ${new Date(session.created_at).toLocaleString()}</div>
+                        ${session.end_time ? `<div><strong>${translations[currentLanguage]['completed_label']}:</strong> ${new Date(session.end_time).toLocaleString()}</div>` : ''}
+                        ${hasClaudeSessionId ? `<div><strong>${translations[currentLanguage]['claude_session_id_label']}:</strong> <code>${session.claude_session_id || session.result.session_id}</code> <span style="color: green;">${translations[currentLanguage]['resume_available']}</span></div>` : `<div style="color: orange;">${translations[currentLanguage]['claude_session_warning']}</div>`}
+                        ${session.error ? `<div style="color: red;"><strong>${translations[currentLanguage]['error_label']}:</strong> ${session.error}</div>` : ''}
                     `;
 
                     sessionsList.appendChild(sessionDiv);
@@ -475,36 +676,36 @@ Webインターフェースを提供します。エージェントの実行、�
             }
         }
 
-        // セッション選択関数 - セッションIDをフィールドに設定して状態を確認
+        // Session selection function - Set session ID to field and check status
         function selectSession(sessionId) {
             document.getElementById('sessionId').value = sessionId;
             checkStatus();
         }
 
-        // セッション再開関数 - セッションIDを再開フィールドに設定
+        // Session resume function - Set session ID to resume field
         function resumeSession(sessionId) {
             document.getElementById('resume_session_id').value = sessionId;
-            // ステータスチェック用のセッションIDも設定
+            // Also set session ID for status check
             document.getElementById('sessionId').value = sessionId;
-            // ボタンテキストを変更してわかりやすくする
+            // Change button text for clarity
             const executeBtn = document.getElementById('executeBtn');
-            executeBtn.textContent = 'セッションを再開';
+            executeBtn.textContent = translations[currentLanguage]['resume_session_text'];
             executeBtn.style.backgroundColor = '#28a745';
         }
 
-        // 新規セッション用にresume IDをクリア
+        // Clear resume ID for new session
         function clearResumeId() {
             document.getElementById('resume_session_id').value = '';
-            // ステータスチェック用のセッションIDもクリア
+            // Also clear session ID for status check
             document.getElementById('sessionId').value = '';
             const executeBtn = document.getElementById('executeBtn');
-            executeBtn.textContent = 'エージェントを実行';
+            executeBtn.textContent = translations[currentLanguage]['execute_agent_text'];
             executeBtn.style.backgroundColor = '#007acc';
         }
 
-        // セッションキャンセル関数（ID指定）
+        // Session cancel function (by ID)
         async function cancelSessionById(sessionId) {
-            if (!confirm(`セッション ${sessionId} をキャンセルしますか？`)) {
+            if (!confirm(translations[currentLanguage]['confirm_cancel_by_id'].replace('{sessionId}', sessionId))) {
                 return;
             }
 
@@ -514,7 +715,7 @@ Webインターフェースを提供します。エージェントの実行、�
                 });
                 const result = await response.json();
 
-                alert(`セッション ${sessionId} がキャンセルされました`);
+                alert(translations[currentLanguage]['session_cancelled'].replace('{sessionId}', sessionId));
                 loadSessions();
 
             } catch (error) {
@@ -522,9 +723,9 @@ Webインターフェースを提供します。エージェントの実行、�
             }
         }
 
-        // セッションクリーンアップ関数 - 完了したセッションを削除
+        // Session cleanup function - Delete completed sessions
         async function cleanupSessions() {
-            if (!confirm('完了したセッションを削除しますか？')) {
+            if (!confirm(translations[currentLanguage]['confirm_cleanup'])) {
                 return;
             }
 
@@ -534,7 +735,7 @@ Webインターフェースを提供します。エージェントの実行、�
                 });
                 const result = await response.json();
 
-                alert(`${result.removed} 個の完了セッションが削除されました`);
+                alert(translations[currentLanguage]['sessions_deleted'].replace('{count}', result.removed));
                 loadSessions();
 
             } catch (error) {
@@ -542,15 +743,15 @@ Webインターフェースを提供します。エージェントの実行、�
             }
         }
 
-        // ページの初期読み込み処理
+        // Page initial loading process
         window.addEventListener('load', () => {
             loadSessions();
 
-            // 自動更新を開始（10秒間隔）
+            // Start auto-refresh (10-second interval)
             autoRefreshInterval = setInterval(loadSessions, 10000);
         });
 
-        // ページを離れるときに自動更新を停止
+        // Stop auto-refresh when leaving page
         window.addEventListener('beforeunload', () => {
             if (autoRefreshInterval) {
                 clearInterval(autoRefreshInterval);

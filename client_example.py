@@ -1,8 +1,8 @@
 """
-Claude Agent SDK APIのサンプルクライアントコード
+Sample client code for Claude Agent SDK API
 
-このモジュールはClaude Agent SDK APIを使用するための
-サンプルクライアント実装を提供します。
+This module provides a sample client implementation
+for using the Claude Agent SDK API.
 """
 
 import time
@@ -13,18 +13,18 @@ import requests
 
 class ClaudeAgentClient:
     """
-    Claude Agent SDK API用クライアントクラス
+    Client class for Claude Agent SDK API
 
-    Claude Agent SDKのHTTP APIとやりとりを行うためのラッパークラスです。
-    エージェントの実行、状態監視、キャンセルなどの機能を提供します。
+    Wrapper class for interacting with Claude Agent SDK HTTP API.
+    Provides functionality for agent execution, status monitoring, cancellation, etc.
     """
 
     def __init__(self, base_url: str = "http://localhost:8000"):
         """
-        クライアントを初期化する
+        Initialize the client
 
         Args:
-            base_url: APIサーバーのベースURL
+            base_url: Base URL of the API server
         """
         self.base_url = base_url
 
@@ -41,21 +41,21 @@ class ClaudeAgentClient:
         **kwargs,
     ) -> str:
         """
-        新しいエージェントセッションを実行または既存セッションを再開する
+        Execute a new agent session or resume an existing session
 
         Args:
-            prompt: エージェントに送信するプロンプト
-            system_prompt: システムプロンプト
-            permission_mode: 許可モード (default, acceptEdits, plan, bypassPermissions)
-            model: 使用するモデル (sonnet, opus, haiku)
-            allowed_tools: 使用を許可するツール名のリスト
-            disallowed_tools: 使用を禁止するツール名のリスト
-            env: 環境変数
-            resume_session_id: 再開するセッションID（指定時は既存セッションを再開）
-            **kwargs: その他のパラメータ
+            prompt: Prompt to send to the agent
+            system_prompt: System prompt
+            permission_mode: Permission mode (default, acceptEdits, plan, bypassPermissions)
+            model: Model to use (sonnet, opus, haiku)
+            allowed_tools: List of tool names allowed to be used
+            disallowed_tools: List of tool names prohibited from use
+            env: Environment variables
+            resume_session_id: Session ID to resume (resumes existing session when specified)
+            **kwargs: Additional parameters
 
         Returns:
-            セッションID
+            Session ID
         """
         data = {"prompt": prompt}
 
@@ -68,7 +68,7 @@ class ClaudeAgentClient:
         if resume_session_id:
             data["resume_session_id"] = resume_session_id
 
-        # その他のパラメータを追加
+        # Add additional parameters
         data.update(kwargs)
 
         response = requests.post(f"{self.base_url}/execute/", json=data)
@@ -79,19 +79,19 @@ class ClaudeAgentClient:
 
     def get_status(self, session_id: str) -> Dict:
         """
-        セッションの状態を取得する
+        Get session status
 
         Args:
-            session_id: セッションID
+            session_id: Session ID
 
         Returns:
-            状態情報
+            Status information
         """
         response = requests.get(f"{self.base_url}/status/{session_id}")
         response.raise_for_status()
         result = response.json()
 
-        # デバッグ: レスポンスの構造を表示
+        # Debug: Display response structure
         print(f"DEBUG: get_status response type: {type(result)}")
         if isinstance(result, dict):
             print(f"DEBUG: get_status keys: {list(result.keys())}")
@@ -105,13 +105,13 @@ class ClaudeAgentClient:
 
     def cleanup_sessions(self, max_age_hours: int = 0) -> Dict:
         """
-        完了したセッションをクリーンアップする
+        Clean up completed sessions
 
         Args:
-            max_age_hours: 保持するセッションの最大経過時間（デフォルト: 0時間で完了済みを全て削除）
+            max_age_hours: Maximum age of sessions to keep (default: 0 hours to remove all completed sessions)
 
         Returns:
-            クリーンアップ結果
+            Cleanup result
         """
         params = {"max_age_hours": max_age_hours}
         response = requests.delete(f"{self.base_url}/sessions/cleanup", params=params)
@@ -120,13 +120,13 @@ class ClaudeAgentClient:
 
     def cancel(self, session_id: str) -> Dict:
         """
-        実行中のセッションをキャンセルする
+        Cancel a running session
 
         Args:
-            session_id: セッションID
+            session_id: Session ID
 
         Returns:
-            キャンセル結果
+            Cancellation result
         """
         response = requests.post(f"{self.base_url}/cancel/{session_id}")
         response.raise_for_status()
@@ -139,15 +139,15 @@ class ClaudeAgentClient:
         timeout: Optional[float] = None,
     ) -> Dict:
         """
-        セッションの完了を待つ
+        Wait for session completion
 
         Args:
-            session_id: セッションID
-            poll_interval: ポーリング間隔（秒）
-            timeout: タイムアウト時間（秒、Noneの場合はタイムアウトなし）
+            session_id: Session ID
+            poll_interval: Polling interval (seconds)
+            timeout: Timeout duration (seconds, no timeout if None)
 
         Returns:
-            最終状態情報
+            Final status information
         """
         start_time = time.time()
 
@@ -159,17 +159,17 @@ class ClaudeAgentClient:
 
             if timeout and (time.time() - start_time) > timeout:
                 raise TimeoutError(
-                    f"セッション {session_id} が {timeout} 秒以内に完了しませんでした"
+                    f"Session {session_id} did not complete within {timeout} seconds"
                 )
 
             time.sleep(poll_interval)
 
     def list_sessions(self) -> list:
         """
-        すべてのセッションを詳細情報付きで一覧表示する
+        List all sessions with detailed information
 
         Returns:
-            セッションの詳細情報リスト
+            List of session detailed information
         """
         response = requests.get(f"{self.base_url}/sessions/")
         response.raise_for_status()
@@ -177,82 +177,82 @@ class ClaudeAgentClient:
 
 
 def main():
-    """使用例のデモンストレーション
+    """Demonstration of usage examples
 
-    Claude Agent SDK APIクライアントの様々な使用パターンを示します。
+    Shows various usage patterns of the Claude Agent SDK API client.
     """
     try:
-        # クライアントを作成
+        # Create client
         client = ClaudeAgentClient()
-        print("サーバーへの接続をテスト中...")
+        print("Testing connection to server...")
 
-        # サーバーが動作しているかテスト
+        # Test if server is running
         import requests
 
         response = requests.get(f"{client.base_url}/")
         if response.status_code == 200:
-            print(f"✓ サーバーが動作中: {client.base_url}")
+            print(f"✓ Server is running: {client.base_url}")
         else:
-            print(f"⚠ サーバーエラー: {response.status_code}")
+            print(f"⚠ Server error: {response.status_code}")
             return
     except Exception as e:
-        print(f"エラー: サーバーに接続できません: {e}")
-        print("FastAPIサーバーが起動しているか確認してください。")
+        print(f"Error: Cannot connect to server: {e}")
+        print("Please verify that the FastAPI server is running.")
         return
 
-    # 例1: シンプルな実行
+    # Example 1: Simple execution
     print("=" * 80)
-    print("例1: シンプルな実行")
-    print("プロンプト：自己紹介してください。")
+    print("Example 1: Simple execution")
+    print("Prompt: Please introduce yourself.")
     print("=" * 80)
 
     session_id = client.execute(
-        prompt="自己紹介してください。",
-        system_prompt="回答は日本語で行ってください。",
+        prompt="Please introduce yourself.",
+        system_prompt="Please respond in English.",
         permission_mode="acceptEdits",
         model="sonnet",
     )
     print(f"Session ID: {session_id}")
 
-    # 完了を待つ
-    print("\n完了を待っています...")
+    # Wait for completion
+    print("\nWaiting for completion...")
     final_status = client.wait_for_completion(session_id)
-    print(f"最終状態: {final_status}")
+    print(f"Final status: {final_status}")
 
     if final_status.get("result"):
-        print(f"結果: {final_status}")
+        print(f"Result: {final_status}")
 
     if final_status.get("error"):
-        print(f"エラー: {final_status['error']}")
+        print(f"Error: {final_status['error']}")
 
-    print(f"実行時間: {final_status.get('duration_ms')}ms")
-    print(f"コスト: ${final_status.get('total_cost_usd')}")
+    print(f"Execution time: {final_status.get('duration_ms')}ms")
+    print(f"Cost: ${final_status.get('total_cost_usd')}")
 
-    # 例3: キャンセル
+    # Example 3: Cancellation
     print("\n" + "=" * 80)
-    print("例3: キャンセル")
+    print("Example 3: Cancellation")
     print("=" * 80)
 
     session_id = client.execute(
-        prompt="1から1000までカウントしてください",
+        prompt="Please count from 1 to 1000",
         permission_mode="acceptEdits",
     )
     print(f"Session ID: {session_id}")
 
-    # 少し待つ
+    # Wait a bit
     time.sleep(5)
 
-    # キャンセル
-    print("\nセッションをキャンセル中...")
+    # Cancel
+    print("\nCancelling session...")
     cancel_result = client.cancel(session_id)
-    print(f"キャンセル結果: {cancel_result}")
+    print(f"Cancellation result: {cancel_result}")
 
-    # すべてのセッションを一覧表示
+    # List all sessions
     print("\n" + "=" * 80)
-    print("すべてのセッション:")
+    print("All sessions:")
     print("=" * 80)
     sessions = client.list_sessions()
-    print(f"総セッション数: {len(sessions)}")
+    print(f"Total sessions: {len(sessions)}")
     for session in sessions:
         session_id = session["session_id"]
         status = session["status"]
@@ -263,20 +263,20 @@ def main():
         )
         print(f"- {session_id}: {status} | {prompt_preview}")
 
-    # 例4: セッション再開
+    # Example 4: Session resume
     print("\n" + "=" * 80)
-    print("例4: セッション再開")
+    print("Example 4: Session resume")
     print("=" * 80)
 
-    # 最初のセッションを作成
+    # Create first session
     first_session_id = client.execute(
-        prompt="私はis0383kkです。覚えてくださいね。",
+        prompt="I am is0383kk. Please remember this.",
         permission_mode="acceptEdits",
     )
-    print(f"最初のセッションID: {first_session_id}")
+    print(f"First session ID: {first_session_id}")
 
-    # 完了を待つ
-    print("最初のセッションの完了を待っています...")
+    # Wait for completion
+    print("Waiting for first session to complete...")
     first_status = client.wait_for_completion(first_session_id)
 
     if (
@@ -284,44 +284,44 @@ def main():
         and first_status.get("result")
         and first_status["result"].get("session_id")
     ):
-        # ClaudeセッションIDが取得できた場合はセッションを再開
-        print(f"ClaudeセッションID: {first_status['result']['session_id']}")
-        print(f"最初の実行結果: {first_status}")
+        # Resume session if Claude session ID was obtained
+        print(f"Claude session ID: {first_status['result']['session_id']}")
+        print(f"First execution result: {first_status}")
 
-        # 同じセッションで異なるプロンプトを送信（再開）
+        # Send different prompt to same session (resume)
         resumed_session_id = client.execute(
-            prompt="私の名前は何だっけ？",
-            resume_session_id=first_session_id,  # 既存セッションを再開
+            prompt="What was my name again?",
+            resume_session_id=first_session_id,  # Resume existing session
         )
-        print(f"再開されたセッションID: {resumed_session_id} (同じIDのはず)")
+        print(f"Resumed session ID: {resumed_session_id} (should be the same ID)")
 
-        # 再開セッションの完了を待つ
-        print("再開セッションの完了を待っています...")
+        # Wait for resumed session completion
+        print("Waiting for resumed session to complete...")
         resumed_status = client.wait_for_completion(resumed_session_id)
-        print(f"再開セッションの最終状態: {resumed_status}")
+        print(f"Resumed session final status: {resumed_status}")
     else:
         print(
-            "最初のセッションが完了しないか、ClaudeセッションIDが取得できませんでした"
+            "First session did not complete or Claude session ID could not be obtained"
         )
 
-    # 例5: クリーンアップ
+    # Example 5: Cleanup
     print("\n" + "=" * 80)
-    print("例5: 完了セッションのクリーンアップ")
+    print("Example 5: Cleanup completed sessions")
     print("=" * 80)
 
-    # クリーンアップ前のセッション数
+    # Session count before cleanup
     sessions_before = client.list_sessions()
-    print(f"クリーンアップ前のセッション数: {len(sessions_before)}")
+    print(f"Sessions before cleanup: {len(sessions_before)}")
 
-    # 完了したセッションをクリーンアップ
+    # Clean up completed sessions
     cleanup_result = client.cleanup_sessions(max_age_hours=0)
-    print(f"クリーンアップ結果: {cleanup_result}")
+    print(f"Cleanup result: {cleanup_result}")
 
-    # クリーンアップ後のセッション数
+    # Session count after cleanup
     sessions_after = client.list_sessions()
-    print(f"クリーンアップ後のセッション数: {len(sessions_after)}")
+    print(f"Sessions after cleanup: {len(sessions_after)}")
 
-    print("\nテストが完了しました！")
+    print("\nTesting completed!")
 
 
 if __name__ == "__main__":
