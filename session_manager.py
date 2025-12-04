@@ -6,6 +6,7 @@ Provides session creation, state management, message tracking, and cleanup funct
 """
 
 import asyncio
+import logging
 import uuid
 from datetime import datetime
 from typing import Any, Dict, List, Optional
@@ -13,6 +14,9 @@ from typing import Any, Dict, List, Optional
 from claude_agent_sdk import ClaudeAgentOptions, ClaudeSDKClient, Message
 
 from models import MessageInfo, SessionStatus
+
+# Setup logging for debugging
+logger = logging.getLogger(__name__)
 
 
 class SessionInfo:
@@ -68,12 +72,12 @@ class SessionInfo:
                     try:
                         result[key] = self._serialize_value(value)
                     except Exception as e:
-                        print(f"DEBUG: Error serializing key '{key}': {e}")
+                        logger.debug(f"Error serializing key '{key}': {e}")
                         result[key] = f"<serialization_error: {str(e)}>"
                 return result
             return str(message)
         except Exception as e:
-            print(f"DEBUG: Error in _serialize_message: {e}")
+            logger.error(f"Error in _serialize_message: {e}")
             return f"<message_serialization_error: {str(e)}>"
 
     def _serialize_value(self, value: Any) -> Any:
@@ -93,13 +97,13 @@ class SessionInfo:
                     try:
                         result[key] = self._serialize_value(val)
                     except Exception as e:
-                        print(f"DEBUG: Error serializing nested key '{key}': {e}")
+                        logger.debug(f"Error serializing nested key '{key}': {e}")
                         result[key] = f"<nested_serialization_error: {str(e)}>"
                 return result
             else:
                 return str(value)
         except Exception as e:
-            print(f"DEBUG: Error in _serialize_value: {e}")
+            logger.error(f"Error in _serialize_value: {e}")
             return f"<value_serialization_error: {str(e)}>"
 
     def get_duration_ms(self) -> Optional[int]:
@@ -160,8 +164,8 @@ class SessionManager:
 
             async with self._lock:
                 self.sessions[session_id] = session
-                print(
-                    f"DEBUG: Created session {session_id}, total sessions: {len(self.sessions)}"
+                logger.info(
+                    f"Created session {session_id}, total sessions: {len(self.sessions)}"
                 )
 
             # Start agent in background
@@ -195,8 +199,8 @@ class SessionManager:
                     raise ValueError(f"Session {session_id} is currently running")
 
                 # Resume session using Claude Agent SDK resume feature
-                print(
-                    f"DEBUG: Resuming session {session_id} with Claude session ID {existing_session.claude_session_id}"
+                logger.info(
+                    f"Resuming session {session_id} with Claude session ID {existing_session.claude_session_id}"
                 )
 
                 # Set resume parameter
@@ -226,8 +230,8 @@ class SessionManager:
                 else:
                     raise ValueError(f"Session {session_id} not found.")
 
-            print(
-                f"DEBUG: Session {session_id} ready for resume with Claude session ID, total sessions: {len(self.sessions)}"
+            logger.info(
+                f"Session {session_id} ready for resume with Claude session ID, total sessions: {len(self.sessions)}"
             )
 
         # Start agent in background
@@ -260,20 +264,20 @@ class SessionManager:
             async for message in session.client.receive_messages():
                 session.add_message(message)
 
-                # Debug: Log detailed message information
-                print(f"DEBUG: Received message type: {type(message).__name__}")
-                print(
-                    f"DEBUG: Message attributes: {[attr for attr in dir(message) if not attr.startswith('_')]}"
+                # Log detailed message information for debugging
+                logger.debug(f"Received message type: {type(message).__name__}")
+                logger.debug(
+                    f"Message attributes: {[attr for attr in dir(message) if not attr.startswith('_')]}"
                 )
                 if hasattr(message, "subtype"):
-                    print(f"DEBUG: Message subtype: {message.subtype}")
+                    logger.debug(f"Message subtype: {message.subtype}")
                 if hasattr(message, "is_error"):
-                    print(f"DEBUG: Message is_error: {message.is_error}")
+                    logger.debug(f"Message is_error: {message.is_error}")
                 if hasattr(message, "content"):
-                    print(f"DEBUG: Message content type: {type(message.content)}")
+                    logger.debug(f"Message content type: {type(message.content)}")
 
-                # Understand message structure in more detail
-                print(f"DEBUG: Full message: {message}")
+                # Log full message structure for detailed debugging
+                logger.debug(f"Full message: {message}")
 
                 # Early capture of Claude session ID (if available from first message)
                 if (
@@ -282,8 +286,8 @@ class SessionManager:
                     and message.session_id
                 ):
                     session.claude_session_id = message.session_id
-                    print(
-                        f"DEBUG: Early capture of Claude session ID: {session.claude_session_id}"
+                    logger.debug(
+                        f"Early capture of Claude session ID: {session.claude_session_id}"
                     )
 
                 # Check if it's an error message
@@ -293,7 +297,7 @@ class SessionManager:
                         session.error = message.result
                     else:
                         session.error = "Unknown error occurred"
-                    print("DEBUG: Setting status to ERROR")
+                    logger.warning("Setting status to ERROR")
                     break
 
                 # Check various completion indicators
@@ -301,7 +305,7 @@ class SessionManager:
 
                 # Check final_result subtype
                 if hasattr(message, "subtype") and message.subtype == "final_result":
-                    print("DEBUG: Found final_result subtype")
+                    logger.debug("Found final_result subtype")
                     is_final = True
 
                 # Check other completion indicators
@@ -310,17 +314,17 @@ class SessionManager:
                     "final",
                     "completion",
                 ]:
-                    print(f"DEBUG: Found completion type: {message.type}")
+                    logger.debug(f"Found completion type: {message.type}")
                     is_final = True
 
                 # Check message with turn count and execution time info (likely final message)
                 if hasattr(message, "num_turns") and hasattr(message, "duration_ms"):
-                    print("DEBUG: Found message with turn/duration info (likely final)")
+                    logger.debug("Found message with turn/duration info (likely final)")
                     is_final = True
 
                 if is_final:
                     session.status = SessionStatus.COMPLETED
-                    print("DEBUG: Setting status to COMPLETED")
+                    logger.info("Setting status to COMPLETED")
                     # Save result information
                     session.result = {
                         "session_id": (
@@ -349,8 +353,8 @@ class SessionManager:
                     # Save actual session ID generated by Claude Agent SDK (for resume)
                     if hasattr(message, "session_id") and message.session_id:
                         session.claude_session_id = message.session_id
-                        print(
-                            f"DEBUG: Saved Claude session ID for resume: {session.claude_session_id}"
+                        logger.info(
+                            f"Saved Claude session ID for resume: {session.claude_session_id}"
                         )
 
                     break
@@ -358,18 +362,18 @@ class SessionManager:
         except asyncio.CancelledError:
             session.status = SessionStatus.CANCELLED
             session.error = "Session was cancelled"
-            print("DEBUG: Session cancelled")
+            logger.info("Session cancelled")
         except Exception as e:
             session.status = SessionStatus.ERROR
             session.error = str(e)
-            print(f"DEBUG: Exception in _run_agent: {e}")
-            print(f"DEBUG: Exception type: {type(e)}")
+            logger.error(f"Exception in _run_agent: {e}")
+            logger.error(f"Exception type: {type(e)}")
             import traceback
 
-            print(f"DEBUG: Full traceback: {traceback.format_exc()}")
+            logger.error(f"Full traceback: {traceback.format_exc()}")
         finally:
             session.end_time = datetime.now()
-            print(f"DEBUG: Session ended with status: {session.status}")
+            logger.info(f"Session ended with status: {session.status}")
             if session.client:
                 try:
                     await session.client.disconnect()
@@ -428,8 +432,8 @@ class SessionManager:
         """
         async with self._lock:
             session_ids = list(self.sessions.keys())
-            print(
-                f"DEBUG: list_sessions called, found {len(session_ids)} sessions: {session_ids}"
+            logger.debug(
+                f"list_sessions called, found {len(session_ids)} sessions: {session_ids}"
             )
             return session_ids
 
@@ -460,7 +464,7 @@ class SessionManager:
                 }
                 sessions_data.append(session_data)
 
-            print(f"DEBUG: get_all_sessions returning {len(sessions_data)} sessions")
+            logger.debug(f"get_all_sessions returning {len(sessions_data)} sessions")
             return sessions_data
 
     async def cleanup_old_sessions(self, max_age_hours: int = 24) -> int:

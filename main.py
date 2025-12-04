@@ -5,7 +5,7 @@ Provides a web service for asynchronous execution of Claude Agent SDK via HTTP e
 """
 
 import os
-from typing import Any, Dict
+from typing import Any, Dict, List, Union
 
 from claude_agent_sdk import ClaudeAgentOptions
 from fastapi import FastAPI, HTTPException, Path
@@ -43,7 +43,7 @@ session_manager = SessionManager()
 
 
 @app.get("/")
-async def root():
+async def root() -> Dict[str, Any]:
     """Root endpoint - Returns basic API information"""
     return {
         "message": "Claude Agent SDK API",
@@ -52,8 +52,25 @@ async def root():
             "execute": "POST /execute/ - Execute a new agent session",
             "status": "GET /status/{session_id} - Get session status",
             "cancel": "POST /cancel/{session_id} - Cancel a running session",
+            "sessions": "GET /sessions/ - List all sessions",
+            "cleanup": "DELETE /sessions/cleanup - Cleanup old sessions",
         },
     }
+
+
+def _extract_permission_mode(permission_mode: Any) -> str:
+    """
+    Extract permission mode value from enum or string
+
+    Args:
+        permission_mode: Permission mode (enum or string)
+
+    Returns:
+        Permission mode as string
+    """
+    if hasattr(permission_mode, "value"):
+        return permission_mode.value
+    return str(permission_mode)
 
 
 def _build_agent_options(request: ExecuteRequest) -> ClaudeAgentOptions:
@@ -66,38 +83,31 @@ def _build_agent_options(request: ExecuteRequest) -> ClaudeAgentOptions:
     Returns:
         ClaudeAgentOptions configured with request parameters
     """
+    options_dict: Dict[str, Any] = {
+        "cwd": request.cwd or os.getcwd(),
+    }
 
-    options_dict: Dict[str, Any] = {}
-
-    # Working directory: Use request cwd, or current directory if not provided
-    options_dict["cwd"] = request.cwd or os.getcwd()
-
-    # Tool configuration (allowed)
+    # Tool configurations
     if request.allowed_tools is not None:
         options_dict["allowed_tools"] = _ensure_list(request.allowed_tools)
 
-    # Tool configuration (disallowed)
     if request.disallowed_tools is not None:
         options_dict["disallowed_tools"] = _ensure_list(request.disallowed_tools)
 
-    # System prompt
+    # Text configurations
     if request.system_prompt is not None:
         options_dict["system_prompt"] = request.system_prompt
 
     # Permission mode
     if request.permission_mode is not None:
-        if hasattr(request.permission_mode, "value"):
-            # Extract value for enum case
-            options_dict["permission_mode"] = request.permission_mode.value
-        else:
-            # String case
-            options_dict["permission_mode"] = request.permission_mode
+        options_dict["permission_mode"] = _extract_permission_mode(
+            request.permission_mode
+        )
 
-    # Model configuration
+    # Model and limits
     if request.model is not None:
         options_dict["model"] = request.model
 
-    # Turn limit
     if request.max_turns is not None:
         options_dict["max_turns"] = request.max_turns
 
@@ -108,9 +118,8 @@ def _build_agent_options(request: ExecuteRequest) -> ClaudeAgentOptions:
     return ClaudeAgentOptions(**options_dict)
 
 
-def _ensure_list(value) -> list:
+def _ensure_list(value: Union[str, List[str], Any]) -> List[str]:
     """
-    For mypy checking
     Ensures the value is a list and converts single values to single-element lists
 
     Args:
@@ -127,13 +136,13 @@ def _ensure_list(value) -> list:
         # Try to convert iterable object to list
         try:
             return list(value)
-        except TypeError:
+        except (TypeError, ValueError):
             # If not iterable, wrap in list
-            return [value]
+            return [str(value)]
 
 
 @app.post("/execute/", response_model=ExecuteResponse)
-async def execute_agent(request: ExecuteRequest):
+async def execute_agent(request: ExecuteRequest) -> ExecuteResponse:
     """
     Execute a new Claude agent session
     or
@@ -155,10 +164,11 @@ async def execute_agent(request: ExecuteRequest):
         )
 
         # Set message for new/resumed session
-        if request.resume_session_id:
-            message = f"Session {session.session_id} resumed successfully"
-        else:
-            message = f"Session {session.session_id} started successfully"
+        message = (
+            f"Session {session.session_id} resumed successfully"
+            if request.resume_session_id
+            else f"Session {session.session_id} started successfully"
+        )
 
         return ExecuteResponse(
             session_id=session.session_id,
@@ -167,18 +177,19 @@ async def execute_agent(request: ExecuteRequest):
         )
 
     except ValueError as e:
-        # For session resume errors
-        raise HTTPException(status_code=400, detail=str(e))
+        # Session resume or validation errors
+        raise HTTPException(status_code=400, detail=str(e)) from e
     except Exception as e:
+        # Unexpected errors
         raise HTTPException(
             status_code=500, detail=f"Failed to create session: {str(e)}"
-        )
+        ) from e
 
 
 @app.get("/status/{session_id}", response_model=StatusResponse)
 async def get_status(
     session_id: str = Path(..., description="Session ID to get status for"),
-):
+) -> StatusResponse:
     """
     Get session status
 
@@ -193,6 +204,11 @@ async def get_status(
     if not session:
         raise HTTPException(status_code=404, detail=f"Session {session_id} not found")
 
+    # Extract cost information safely
+    total_cost_usd = None
+    if session.result and isinstance(session.result, dict):
+        total_cost_usd = session.result.get("total_cost_usd")
+
     return StatusResponse(
         session_id=session.session_id,
         status=session.status,
@@ -200,18 +216,14 @@ async def get_status(
         result=session.result,
         error=session.error,
         duration_ms=session.get_duration_ms(),
-        total_cost_usd=(
-            session.result.get("total_cost_usd")
-            if session.result and isinstance(session.result, dict)
-            else None
-        ),
+        total_cost_usd=total_cost_usd,
     )
 
 
 @app.post("/cancel/{session_id}", response_model=CancelResponse)
 async def cancel_session(
     session_id: str = Path(..., description="Session ID to cancel"),
-):
+) -> CancelResponse:
     """
     Cancel a running session
 
@@ -225,16 +237,16 @@ async def cancel_session(
     session = await session_manager.get_session(session_id)
 
     if not session:
-        # Return 404 error if session doesn't exist
         raise HTTPException(status_code=404, detail=f"Session {session_id} not found")
 
-    # Return 400 error if session is not running
+    # Check if session is in a cancellable state
     if session.status != SessionStatus.RUNNING:
         raise HTTPException(
             status_code=400,
             detail=f"Session {session_id} is not running (status: {session.status})",
         )
 
+    # Attempt to cancel the session
     success = await session_manager.cancel_session(session_id)
 
     if not success:
@@ -250,19 +262,18 @@ async def cancel_session(
 
 
 @app.get("/sessions/")
-async def list_sessions():
+async def list_sessions() -> List[Dict[str, Any]]:
     """
     List all sessions with detailed information
 
     Returns:
         List of session detailed information
     """
-    sessions = await session_manager.get_all_sessions()
-    return sessions
+    return await session_manager.get_all_sessions()
 
 
 @app.delete("/sessions/cleanup")
-async def cleanup_sessions(max_age_hours: int = 24):
+async def cleanup_sessions(max_age_hours: int = 24) -> Dict[str, Any]:
     """
     Clean up old sessions
 
@@ -270,7 +281,7 @@ async def cleanup_sessions(max_age_hours: int = 24):
         max_age_hours: Maximum age of sessions to keep (default: 24 hours)
 
     Returns:
-        Number of cleaned up sessions
+        Dictionary with cleanup results
     """
     removed = await session_manager.cleanup_old_sessions(max_age_hours)
     return {"removed": removed, "message": f"Cleaned up {removed} old sessions"}
