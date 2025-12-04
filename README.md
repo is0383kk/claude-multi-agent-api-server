@@ -1,7 +1,7 @@
-# Claude Agent API Server
+# Claude Multi-Agent API Server
 
-A production-ready FastAPI web service that enables asynchronous execution of Claude Agent SDK via HTTP API.  
-Features comprehensive session management functionality for processing long-running agent tasks in the background, with real-time status monitoring and cancellation capabilities.
+A production-ready FastAPI web service that enables concurrent execution and management of multiple Claude Agent sessions via HTTP API.
+Features advanced multi-agent session management with independent lifecycle control, real-time monitoring of each agent's progress, cost tracking per session, session resumption capabilities, and comprehensive background task orchestration for scalable AI agent deployment.
 
 ## ■ Available API Endpoints
 
@@ -17,7 +17,7 @@ Features comprehensive session management functionality for processing long-runn
 ## ■ File Structure
 
 ```
-Claude-Agent-API-Server/
+Claude-Multi-Agent-API-Server/
 ├── main.py                 # Main FastAPI application file
 ├── models.py               # Pydantic model definitions and validation
 ├── session_manager.py      # Session lifecycle management
@@ -207,10 +207,10 @@ MIT License
 
 ---
 
-# Claude Agent API Server
+# Claude Multi-Agent API Server
 
-Claude Agent SDK を HTTP API 経由で非同期実行できるようにした本格的な FastAPI Web サービスです。  
-セッション管理機能を備え、長時間実行されるエージェントタスクをバックグラウンドで処理し、リアルタイムでの状態監視とキャンセル機能を提供します。
+複数の Claude Agent セッションの同時実行と管理を可能にした FastAPI Web サービスです。
+高度なマルチエージェントセッション管理機能により、各エージェントの独立したライフサイクル制御、セッション毎のリアルタイム進捗監視、コスト追跡、セッション再開機能、およびスケーラブルな AI エージェント展開のための包括的なバックグラウンドタスク オーケストレーションを提供します。
 
 ## ■ 提供している API エンドポイント一覧
 
@@ -226,7 +226,7 @@ Claude Agent SDK を HTTP API 経由で非同期実行できるようにした�
 ## ■ ファイル構成
 
 ```
-Claude-Agent-API-Server/
+Claude-Multi-Agent-API-Server/
 ├── main.py                 # FastAPIアプリケーションのメインファイル
 ├── models.py               # Pydanticモデル定義とバリデーション
 ├── session_manager.py      # セッションライフサイクル管理
