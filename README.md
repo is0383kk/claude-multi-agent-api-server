@@ -21,8 +21,9 @@ Claude-Multi-Agent-API-Server/
 ├── main.py                 # Main FastAPI application file
 ├── models.py               # Pydantic model definitions and validation
 ├── session_manager.py      # Session lifecycle management
-├── client_example.py       # Production-ready Python client implementation example
-├── index.html              # Interactive web test interface
+├── examples/                # Usage examples and test files
+│   ├── client_example.py   # Production-ready Python client implementation example
+│   └── index.html          # Interactive web test interface
 └── requirements.txt        # Python dependency definitions
 ```
 
@@ -174,14 +175,14 @@ uvicorn main:app --reload --host 0.0.0.0 --port 8000
 
 ## ■ Pattern 1: Test with Web Interface
 
-After starting the server, open `index.html` in a browser for GUI operation.
+After starting the server, open `examples/index.html` in a browser for GUI operation.
 
 ## ■ Pattern 2: Test with Python Client
 
-Running `client_example.py` executes batch processing for all API endpoints.
+Running `examples/client_example.py` executes batch processing for all API endpoints.
 
 ```python
-python client_example.py
+python examples/client_example.py
 ```
 
 # 4. Important Notes and Best Practices
@@ -230,8 +231,9 @@ Claude-Multi-Agent-API-Server/
 ├── main.py                 # FastAPIアプリケーションのメインファイル
 ├── models.py               # Pydanticモデル定義とバリデーション
 ├── session_manager.py      # セッションライフサイクル管理
-├── client_example.py       # 本格的なPythonクライアント実装例
-├── index.html              # インタラクティブWebテストインターフェース
+├── examples/                # 使用例とテスト用ファイル
+│   ├── client_example.py   # 本格的なPythonクライアント実装例
+│   └── index.html          # インタラクティブWebテストインターフェース
 └── requirements.txt        # Python依存パッケージ定義
 ```
 
@@ -383,14 +385,14 @@ uvicorn main:app --reload --host 0.0.0.0 --port 8000
 
 ## ■ パターン１：Web インターフェースでテスト
 
-サーバーを起動した後、`index.html`をブラウザで開いて GUI で操作できます。
+サーバーを起動した後、`examples/index.html`をブラウザで開いて GUI で操作できます。
 
 ## ■ パターン２：Python クライアントでテスト
 
-`client_example.py`を実行すると、API エンドポイントで定義されている処理を一括実行できます。
+`examples/client_example.py`を実行すると、API エンドポイントで定義されている処理を一括実行できます。
 
 ```python
-python client_example.py
+python examples/client_example.py
 ```
 
 # 4. 注意事項とベストプラクティス
