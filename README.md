@@ -177,6 +177,13 @@ uvicorn main:app --reload --host 0.0.0.0 --port 8000
 
 After starting the server, open `examples/index.html` in a browser for GUI operation.
 
+![Web Interface Screenshot](img/001.png)
+
+The web interface provides:
+- **Agent Execution**: Execute agents with configurable options (prompt, model, permission mode, etc.)
+- **Session Status Check**: Monitor session status and view message history
+- **Active Sessions List**: View all active sessions with resume and cancel capabilities
+
 ## ■ Pattern 2: Test with Python Client
 
 Running `examples/client_example.py` executes batch processing for all API endpoints.
@@ -386,6 +393,13 @@ uvicorn main:app --reload --host 0.0.0.0 --port 8000
 ## ■ パターン１：Web インターフェースでテスト
 
 サーバーを起動した後、`examples/index.html`をブラウザで開いて GUI で操作できます。
+
+![Web インターフェーススクリーンショット](img/001.png)
+
+Web インターフェースでは以下の機能が利用できます：
+- **エージェント実行**: プロンプト、モデル、許可モードなどを設定してエージェントを実行
+- **セッション状態確認**: セッションのステータス監視とメッセージ履歴の表示
+- **アクティブセッション一覧**: すべてのアクティブセッションの表示、再開、キャンセル機能
 
 ## ■ パターン２：Python クライアントでテスト
 
