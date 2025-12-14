@@ -1,6 +1,6 @@
 # Claude Multi-Agent API Server
 
-A production-ready FastAPI web service that enables concurrent execution and management of multiple Claude Agent sessions via HTTP API.
+A production-ready FastAPI web service that enables concurrent execution and management of multiple Claude Agent sessions via HTTP API.  
 Features advanced multi-agent session management with independent lifecycle control, real-time monitoring of each agent's progress, cost tracking per session, session resumption capabilities, and comprehensive background task orchestration for scalable AI agent deployment.
 
 ## ■ Available API Endpoints
@@ -180,6 +180,7 @@ After starting the server, open `examples/index.html` in a browser for GUI opera
 ![Web Interface Screenshot](img/001.png)
 
 The web interface provides:
+
 - **Agent Execution**: Execute agents with configurable options (prompt, model, permission mode, etc.)
 - **Session Status Check**: Monitor session status and view message history
 - **Active Sessions List**: View all active sessions with resume and cancel capabilities
@@ -217,7 +218,7 @@ MIT License
 
 # Claude Multi-Agent API Server
 
-複数の Claude Agent セッションの同時実行と管理を可能にした FastAPI Web サービスです。
+複数の Claude Agent セッションの同時実行と管理を可能にした FastAPI Web サービスです。  
 高度なマルチエージェントセッション管理機能により、各エージェントの独立したライフサイクル制御、セッション毎のリアルタイム進捗監視、コスト追跡、セッション再開機能、およびスケーラブルな AI エージェント展開のための包括的なバックグラウンドタスク オーケストレーションを提供します。
 
 ## ■ 提供している API エンドポイント一覧
@@ -397,6 +398,7 @@ uvicorn main:app --reload --host 0.0.0.0 --port 8000
 ![Web インターフェーススクリーンショット](img/001.png)
 
 Web インターフェースでは以下の機能が利用できます：
+
 - **エージェント実行**: プロンプト、モデル、許可モードなどを設定してエージェントを実行
 - **セッション状態確認**: セッションのステータス監視とメッセージ履歴の表示
 - **アクティブセッション一覧**: すべてのアクティブセッションの表示、再開、キャンセル機能
