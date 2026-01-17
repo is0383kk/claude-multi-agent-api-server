@@ -732,6 +732,7 @@ Features responsive design, bilingual support, and comprehensive session managem
                         no_active_sessions: "No active sessions",
                         resume_button: "Resume",
                         cancel_button: "Cancel",
+                        delete_button: "Delete",
                         status_label: "Status",
                         prompt_display: "Prompt",
                         created_label: "Created",
@@ -743,6 +744,8 @@ Features responsive design, bilingual support, and comprehensive session managem
                         confirm_cancel: "Cancel this session?",
                         confirm_cancel_by_id: "Cancel session {sessionId}?",
                         session_cancelled: "Session {sessionId} has been cancelled",
+                        confirm_delete_by_id: "Are you sure you want to delete session {sessionId}?",
+                        session_deleted: "Session {sessionId} has been deleted successfully",
                         confirm_cleanup: "Delete completed sessions?",
                         sessions_deleted: "{count} completed sessions were deleted",
                         enter_session_id: "Please enter a session ID",
@@ -794,6 +797,7 @@ Features responsive design, bilingual support, and comprehensive session managem
                         no_active_sessions: "アクティブなセッションはありません",
                         resume_button: "再開",
                         cancel_button: "キャンセル",
+                        delete_button: "削除",
                         status_label: "状態",
                         prompt_display: "プロンプト",
                         created_label: "作成日時",
@@ -805,6 +809,8 @@ Features responsive design, bilingual support, and comprehensive session managem
                         confirm_cancel: "このセッションをキャンセルしますか？",
                         confirm_cancel_by_id: "セッション {sessionId} をキャンセルしますか？",
                         session_cancelled: "セッション {sessionId} がキャンセルされました",
+                        confirm_delete_by_id: "セッション {sessionId} を削除しますか？",
+                        session_deleted: "セッション {sessionId} が削除されました",
                         confirm_cleanup: "完了したセッションを削除しますか？",
                         sessions_deleted: "{count} 個の完了セッションが削除されました",
                         enter_session_id: "セッション ID を入力してください",
@@ -1156,6 +1162,10 @@ Features responsive design, bilingual support, and comprehensive session managem
                                         class="btn btn-danger">
                                     ${languageManager.text.cancel_button}
                                 </button>
+                                <button onclick="sessionManager.deleteSessionById('${session.session_id}')"
+                                        class="btn btn-secondary">
+                                    ${languageManager.text.delete_button}
+                                </button>
                             </div>
                         </div>
                         <div class="status-badge status-${session.status}">
@@ -1227,6 +1237,34 @@ Features responsive design, bilingual support, and comprehensive session managem
                     this.loadSessions();
 
                 } catch (error) {
+                    alert(`Error: ${error.message}`);
+                }
+            }
+
+            /**
+             * Delete a session by ID
+             * @param {string} sessionId - Session ID to delete
+             */
+            async deleteSessionById(sessionId) {
+                // Confirm deletion
+                if (!confirm(languageManager.interpolate('confirm_delete_by_id', { sessionId }))) {
+                    return;
+                }
+
+                try {
+                    // Call DELETE /sessions/{session_id} API
+                    await Utils.request(`${CONFIG.API_BASE}/sessions/${sessionId}`, {
+                        method: 'DELETE'
+                    });
+
+                    // Show success message
+                    alert(languageManager.interpolate('session_deleted', { sessionId }));
+
+                    // Reload sessions list
+                    this.loadSessions();
+
+                } catch (error) {
+                    // Show error message
                     alert(`Error: ${error.message}`);
                 }
             }

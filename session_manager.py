@@ -492,3 +492,45 @@ class SessionManager:
                 removed += 1
 
         return removed
+
+    async def delete_session(
+        self, session_id: str
+    ) -> tuple[bool, Optional[str], Optional[SessionStatus]]:
+        """Delete a specific session by session ID
+
+        Deletes session from memory. Cannot delete running sessions.
+        Running sessions must be cancelled first using cancel_session().
+
+        Args:
+            session_id: ID of the session to delete
+
+        Returns:
+            Tuple of (success: bool, error_message: Optional[str], status_before_deletion: Optional[SessionStatus])
+            - success: True if deletion was successful, False otherwise
+            - error_message: Error message if deletion failed, None otherwise
+            - status_before_deletion: Session status before deletion, None if session not found
+        """
+        async with self._lock:
+            session = self.sessions.get(session_id)
+
+            if not session:
+                return (False, f"Session {session_id} not found", None)
+
+            # Check if session is in a deletable state
+            if session.status == SessionStatus.RUNNING:
+                return (
+                    False,
+                    f"Cannot delete running session {session_id}. Please cancel it first.",
+                    session.status,
+                )
+
+            # Store status before deletion for response
+            status_before = session.status
+
+            # Delete session from memory
+            del self.sessions[session_id]
+            logger.info(
+                f"Deleted session {session_id} with status {status_before}, remaining sessions: {len(self.sessions)}"
+            )
+
+            return (True, None, status_before)

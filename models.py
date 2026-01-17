@@ -119,6 +119,17 @@ class CancelResponse(BaseModel):
     message: str = Field(..., description="Status message")
 
 
+class DeleteResponse(BaseModel):
+    """Response model for DELETE /sessions/{session_id} endpoint
+
+    Returns the result of session deletion operation.
+    """
+
+    session_id: str = Field(..., description="Deleted session ID")
+    status: SessionStatus = Field(..., description="Status before deletion")
+    message: str = Field(..., description="Status message")
+
+
 class MessageInfo(BaseModel):
     """Information about messages
 
