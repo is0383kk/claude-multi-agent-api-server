@@ -7,7 +7,7 @@ uvicorn[standard]==0.38.0
 pydantic==2.12.5
 
 # Claude Agent SDK integration
-claude-agent-sdk==0.1.16
+claude-agent-sdk==0.1.20
 
 # HTTP client for client examples
 requests>=2.28.0
