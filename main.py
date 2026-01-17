@@ -13,6 +13,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from models import (
     CancelResponse,
+    DeleteResponse,
     ExecuteRequest,
     ExecuteResponse,
     SessionStatus,
@@ -52,6 +53,7 @@ async def root() -> Dict[str, Any]:
             "execute": "POST /execute/ - Execute a new agent session",
             "status": "GET /status/{session_id} - Get session status",
             "cancel": "POST /cancel/{session_id} - Cancel a running session",
+            "delete": "DELETE /sessions/{session_id} - Delete a specific session",
             "sessions": "GET /sessions/ - List all sessions",
             "cleanup": "DELETE /sessions/cleanup - Cleanup old sessions",
         },
@@ -285,6 +287,49 @@ async def cleanup_sessions(max_age_hours: int = 24) -> Dict[str, Any]:
     """
     removed = await session_manager.cleanup_old_sessions(max_age_hours)
     return {"removed": removed, "message": f"Cleaned up {removed} old sessions"}
+
+
+@app.delete("/sessions/{session_id}", response_model=DeleteResponse)
+async def delete_session(
+    session_id: str = Path(..., description="Session ID to delete"),
+) -> DeleteResponse:
+    """
+    Delete a specific session by session ID
+
+    Deletes the specified session from memory.
+    Cannot delete running sessions - they must be cancelled first.
+
+    Only sessions with status COMPLETED, CANCELLED, ERROR, or PENDING can be deleted.
+
+    Args:
+        session_id: Session ID to delete
+
+    Returns:
+        DeleteResponse containing session ID, status before deletion, and result message
+
+    Raises:
+        HTTPException:
+            - 404 if session not found
+            - 400 if session is running
+    """
+    # Attempt to delete the session
+    success, error_message, status_before = await session_manager.delete_session(
+        session_id
+    )
+
+    if not success:
+        if status_before == SessionStatus.RUNNING:
+            # Session is running - cannot delete
+            raise HTTPException(status_code=400, detail=error_message)
+        else:
+            # Session not found
+            raise HTTPException(status_code=404, detail=error_message)
+
+    return DeleteResponse(
+        session_id=session_id,
+        status=status_before,
+        message=f"Session {session_id} deleted successfully",
+    )
 
 
 if __name__ == "__main__":
