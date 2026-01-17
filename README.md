@@ -5,14 +5,15 @@ Features advanced multi-agent session management with independent lifecycle cont
 
 ## ■ Available API Endpoints
 
-| Endpoint               | Method | Description                                        |
-| ---------------------- | ------ | -------------------------------------------------- |
-| `/`                    | GET    | Basic API information and available endpoints list |
-| `/execute/`            | POST   | Start a new Claude agent session                   |
-| `/status/{session_id}` | GET    | Get session status, message history, and results   |
-| `/cancel/{session_id}` | POST   | Cancel a running session                           |
-| `/sessions/`           | GET    | Get detailed information of all active sessions    |
-| `/sessions/cleanup`    | DELETE | Clean up old sessions                              |
+| Endpoint                  | Method | Description                                        |
+| ------------------------- | ------ | -------------------------------------------------- |
+| `/`                       | GET    | Basic API information and available endpoints list |
+| `/execute/`               | POST   | Start a new Claude agent session                   |
+| `/status/{session_id}`    | GET    | Get session status, message history, and results   |
+| `/cancel/{session_id}`    | POST   | Cancel a running session                           |
+| `/sessions/`              | GET    | Get detailed information of all active sessions    |
+| `/sessions/{session_id}`  | DELETE | Delete a specific session by ID                    |
+| `/sessions/cleanup`       | DELETE | Clean up old sessions                              |
 
 ## ■ File Structure
 
@@ -129,6 +130,35 @@ Get detailed information of all active sessions.
 ]
 ```
 
+## ■ Individual Session Deletion (`DELETE /sessions/{session_id}`)
+
+Delete a specific session by session ID.
+
+**Path Parameters:**
+
+- `session_id`: Session ID to delete
+
+**Response Example:**
+
+```json
+{
+  "session_id": "123e4567-e89b-12d3-a456-426614174000",
+  "status": "completed",
+  "message": "Session 123e4567-e89b-12d3-a456-426614174000 deleted successfully"
+}
+```
+
+**Error Responses:**
+
+- `404 Not Found`: Session does not exist
+- `400 Bad Request`: Cannot delete running sessions (must be cancelled first)
+
+**Notes:**
+
+- Only sessions with status `completed`, `cancelled`, `error`, or `pending` can be deleted
+- Running sessions must be cancelled first using `/cancel/{session_id}`
+- Deleted sessions cannot be resumed
+
 ## ■ Old Session Cleanup (`DELETE /sessions/cleanup`)
 
 Delete sessions older than the specified time.
@@ -223,14 +253,15 @@ MIT License
 
 ## ■ 提供している API エンドポイント一覧
 
-| エンドポイント         | メソッド | 説明                                         |
-| ---------------------- | -------- | -------------------------------------------- |
-| `/`                    | GET      | API の基本情報と利用可能エンドポイント一覧   |
-| `/execute/`            | POST     | 新しい Claude エージェントセッションを開始   |
-| `/status/{session_id}` | GET      | セッションの状態、メッセージ履歴、結果を取得 |
-| `/cancel/{session_id}` | POST     | 実行中のセッションをキャンセル               |
-| `/sessions/`           | GET      | すべてのアクティブセッションの詳細情報を取得 |
-| `/sessions/cleanup`    | DELETE   | 古いセッションをクリーンアップ               |
+| エンドポイント            | メソッド | 説明                                         |
+| ------------------------- | -------- | -------------------------------------------- |
+| `/`                       | GET      | API の基本情報と利用可能エンドポイント一覧   |
+| `/execute/`               | POST     | 新しい Claude エージェントセッションを開始   |
+| `/status/{session_id}`    | GET      | セッションの状態、メッセージ履歴、結果を取得 |
+| `/cancel/{session_id}`    | POST     | 実行中のセッションをキャンセル               |
+| `/sessions/`              | GET      | すべてのアクティブセッションの詳細情報を取得 |
+| `/sessions/{session_id}`  | DELETE   | 指定したセッションIDで個別にセッションを削除 |
+| `/sessions/cleanup`       | DELETE   | 古いセッションをクリーンアップ               |
 
 ## ■ ファイル構成
 
@@ -346,6 +377,35 @@ Claude Agent SDK によるエージェントを実行します。
   }
 ]
 ```
+
+## ■ 個別セッションの削除 (`DELETE /sessions/{session_id}`)
+
+セッションIDを指定して個別にセッションを削除します。
+
+**パスパラメータ:**
+
+- `session_id`: 削除するセッション ID
+
+**レスポンス例:**
+
+```json
+{
+  "session_id": "123e4567-e89b-12d3-a456-426614174000",
+  "status": "completed",
+  "message": "Session 123e4567-e89b-12d3-a456-426614174000 deleted successfully"
+}
+```
+
+**エラーレスポンス:**
+
+- `404 Not Found`: セッションが存在しない
+- `400 Bad Request`: 実行中のセッションは削除できません（先にキャンセルが必要）
+
+**注意事項:**
+
+- `completed`、`cancelled`、`error`、`pending` 状態のセッションのみ削除可能
+- 実行中のセッションは先に `/cancel/{session_id}` でキャンセルする必要があります
+- 削除されたセッションは再開できません
 
 ## ■ 古いセッションのクリーンアップ (`DELETE /sessions/cleanup`)
 
