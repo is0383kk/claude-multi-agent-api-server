@@ -1,6 +1,6 @@
 ---
 source_url: https://platform.claude.com/docs/en/agent-sdk/skills
-crawled_at: 2026-02-22 18:25:11
+crawled_at: 2026-02-23 18:53:19
 ---
 
 # Agent Skills in the SDK
