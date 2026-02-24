@@ -1,6 +1,6 @@
 ---
 source_url: https://platform.claude.com/docs/en/agent-sdk/structured-outputs
-crawled_at: 2026-02-23 18:53:54
+crawled_at: 2026-02-24 18:51:59
 ---
 
 # Get structured output from agents

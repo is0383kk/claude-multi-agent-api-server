@@ -1,6 +1,6 @@
 ---
 source_url: https://platform.claude.com/docs/en/agent-sdk/custom-tools
-crawled_at: 2026-02-23 18:53:27
+crawled_at: 2026-02-24 18:52:10
 ---
 
 # Custom Tools
