@@ -1,6 +1,6 @@
 ---
 source_url: https://platform.claude.com/docs/en/agent-sdk/streaming-output
-crawled_at: 2026-02-24 18:52:23
+crawled_at: 2026-02-25 18:55:56
 ---
 
 # Stream responses in real-time
@@ -102,7 +102,7 @@ type SDKPartialAssistantMessage = {
   parent_tool_use_id: string | null;
   uuid: UUID;
   session_id: string;
-}
+};
 ```
 
 </CodeGroup>

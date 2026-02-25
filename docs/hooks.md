@@ -1,6 +1,6 @@
 ---
 source_url: https://platform.claude.com/docs/en/agent-sdk/hooks
-crawled_at: 2026-02-24 18:52:18
+crawled_at: 2026-02-25 18:55:54
 ---
 
 # Intercept and control agent behavior with hooks
@@ -233,9 +233,7 @@ options = ClaudeAgentOptions(
 ```typescript TypeScript
 const options = {
   hooks: {
-    PreToolUse: [
-      { matcher: "Write|Edit", hooks: [validateFilePath] }
-    ]
+    PreToolUse: [{ matcher: "Write|Edit", hooks: [validateFilePath] }]
   }
 };
 ```

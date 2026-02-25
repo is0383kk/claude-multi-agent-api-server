@@ -1,6 +1,6 @@
 ---
 source_url: https://platform.claude.com/docs/en/agent-sdk/quickstart
-crawled_at: 2026-02-24 18:52:04
+crawled_at: 2026-02-25 18:55:41
 ---
 
 # Quickstart
@@ -226,11 +226,13 @@ options = ClaudeAgentOptions(
 )
 ```
 
-```typescript TypeScript
-options: {
-  allowedTools: ["Read", "Edit", "Glob", "WebSearch"],
-  permissionMode: "acceptEdits"
-}
+```typescript TypeScript hidelines={1,-1}
+const _ = {
+  options: {
+    allowedTools: ["Read", "Edit", "Glob", "WebSearch"],
+    permissionMode: "acceptEdits"
+  }
+};
 ```
 </CodeGroup>
 
@@ -245,12 +247,14 @@ options = ClaudeAgentOptions(
 )
 ```
 
-```typescript TypeScript
-options: {
-  allowedTools: ["Read", "Edit", "Glob"],
-  permissionMode: "acceptEdits",
-  systemPrompt: "You are a senior Python developer. Always follow PEP 8 style guidelines."
-}
+```typescript TypeScript hidelines={1,-1}
+const _ = {
+  options: {
+    allowedTools: ["Read", "Edit", "Glob"],
+    permissionMode: "acceptEdits",
+    systemPrompt: "You are a senior Python developer. Always follow PEP 8 style guidelines."
+  }
+};
 ```
 </CodeGroup>
 
@@ -263,11 +267,13 @@ options = ClaudeAgentOptions(
 )
 ```
 
-```typescript TypeScript
-options: {
-  allowedTools: ["Read", "Edit", "Glob", "Bash"],
-  permissionMode: "acceptEdits"
-}
+```typescript TypeScript hidelines={1,-1}
+const _ = {
+  options: {
+    allowedTools: ["Read", "Edit", "Glob", "Bash"],
+    permissionMode: "acceptEdits"
+  }
+};
 ```
 </CodeGroup>
 

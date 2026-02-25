@@ -1,6 +1,6 @@
 ---
 source_url: https://platform.claude.com/docs/en/agent-sdk/streaming-vs-single-mode
-crawled_at: 2026-02-24 18:52:19
+crawled_at: 2026-02-25 18:56:05
 ---
 
 # Streaming Input
@@ -104,7 +104,7 @@ async function* generateMessages() {
   };
 
   // Wait for conditions or user input
-  await new Promise(resolve => setTimeout(resolve, 2000));
+  await new Promise((resolve) => setTimeout(resolve, 2000));
 
   // Follow-up with image
   yield {
