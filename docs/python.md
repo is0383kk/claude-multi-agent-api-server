@@ -1,6 +1,6 @@
 ---
 source_url: https://platform.claude.com/docs/en/agent-sdk/python
-crawled_at: 2026-02-26 18:41:34
+crawled_at: 2026-02-27 18:32:27
 ---
 
 # Agent SDK reference - Python
@@ -1286,7 +1286,7 @@ HookCallback = Callable[[HookInput, str | None, HookContext], Awaitable[HookJSON
 
 Parameters:
 
-- `input`: Strongly-typed hook input with discriminated unions based on `hook_event_name` (see [Hook input types](#pretoolusehookinput))
+- `input`: Strongly-typed hook input with discriminated unions based on `hook_event_name` (see [`HookInput`](#hook-input))
 - `tool_use_id`: Optional tool use identifier (for tool-related hooks)
 - `context`: Hook context with additional information
 
@@ -1581,7 +1581,7 @@ Use `continue_` (with underscore) in Python code. It is automatically converted 
 
 #### `HookSpecificOutput`
 
-A `TypedDict` containing the hook event name and event-specific fields. The shape depends on the `hookEventName` value. For full details on available fields per hook event, see [Control execution with hooks](/docs/en/agent-sdk/hooks#callback-outputs).
+A `TypedDict` containing the hook event name and event-specific fields. The shape depends on the `hookEventName` value. For full details on available fields per hook event, see [Control execution with hooks](/docs/en/agent-sdk/hooks#outputs).
 
 A discriminated union of event-specific output types. The `hookEventName` field determines which fields are valid.
 

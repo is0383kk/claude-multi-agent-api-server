@@ -1,6 +1,6 @@
 ---
 source_url: https://platform.claude.com/docs/en/agent-sdk/plugins
-crawled_at: 2026-02-26 18:42:15
+crawled_at: 2026-02-27 18:32:30
 ---
 
 # Plugins in the SDK
