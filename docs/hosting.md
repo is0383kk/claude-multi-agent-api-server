@@ -1,6 +1,6 @@
 ---
 source_url: https://platform.claude.com/docs/en/agent-sdk/hosting
-crawled_at: 2026-02-27 18:32:11
+crawled_at: 2026-02-28 18:22:38
 ---
 
 # Hosting the Agent SDK

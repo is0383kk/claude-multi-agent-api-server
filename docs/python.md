@@ -1,6 +1,6 @@
 ---
 source_url: https://platform.claude.com/docs/en/agent-sdk/python
-crawled_at: 2026-02-27 18:32:27
+crawled_at: 2026-02-28 18:22:21
 ---
 
 # Agent SDK reference - Python
@@ -2418,7 +2418,9 @@ try:
     async for message in query(prompt="Hello"):
         print(message)
 except CLINotFoundError:
-    print("Claude Code CLI not found. Try reinstalling: pip install --force-reinstall claude-agent-sdk")
+    print(
+        "Claude Code CLI not found. Try reinstalling: pip install --force-reinstall claude-agent-sdk"
+    )
 except ProcessError as e:
     print(f"Process failed with exit code: {e.exit_code}")
 except CLIJSONDecodeError as e:
