@@ -1,6 +1,6 @@
 ---
 source_url: https://platform.claude.com/docs/en/agent-sdk/modifying-system-prompts
-crawled_at: 2026-03-05 19:11:08
+crawled_at: 2026-03-06 18:34:43
 ---
 
 # Modifying system prompts

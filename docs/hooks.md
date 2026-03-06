@@ -1,6 +1,6 @@
 ---
 source_url: https://platform.claude.com/docs/en/agent-sdk/hooks
-crawled_at: 2026-03-05 19:11:21
+crawled_at: 2026-03-06 18:34:55
 ---
 
 # Intercept and control agent behavior with hooks

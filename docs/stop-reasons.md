@@ -1,6 +1,6 @@
 ---
 source_url: https://platform.claude.com/docs/en/agent-sdk/stop-reasons
-crawled_at: 2026-03-05 19:11:26
+crawled_at: 2026-03-06 18:34:32
 ---
 
 # Handle stop reasons
