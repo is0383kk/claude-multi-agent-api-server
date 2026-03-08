@@ -1,6 +1,6 @@
 ---
 source_url: https://platform.claude.com/docs/en/agent-sdk/overview
-crawled_at: 2026-03-07 18:23:44
+crawled_at: 2026-03-08 18:23:26
 ---
 
 # Agent SDK overview
@@ -250,7 +250,7 @@ Everything that makes Claude Code powerful is available in the SDK:
   <Tab title="Subagents">
     Spawn specialized agents to handle focused subtasks. Your main agent delegates work, and subagents report back with results.
 
-    Define custom agents with specialized instructions. Include `Task` in `allowedTools` since subagents are invoked via the Task tool:
+    Define custom agents with specialized instructions. Include `Agent` in `allowedTools` since subagents are invoked via the Agent tool:
 
     <CodeGroup>
     ```python Python
@@ -262,7 +262,7 @@ Everything that makes Claude Code powerful is available in the SDK:
         async for message in query(
             prompt="Use the code-reviewer agent to review this codebase",
             options=ClaudeAgentOptions(
-                allowed_tools=["Read", "Glob", "Grep", "Task"],
+                allowed_tools=["Read", "Glob", "Grep", "Agent"],
                 agents={
                     "code-reviewer": AgentDefinition(
                         description="Expert code reviewer for quality and security reviews.",
@@ -285,7 +285,7 @@ Everything that makes Claude Code powerful is available in the SDK:
     for await (const message of query({
       prompt: "Use the code-reviewer agent to review this codebase",
       options: {
-        allowedTools: ["Read", "Glob", "Grep", "Task"],
+        allowedTools: ["Read", "Glob", "Grep", "Agent"],
         agents: {
           "code-reviewer": {
             description: "Expert code reviewer for quality and security reviews.",
