@@ -1,6 +1,6 @@
 ---
 source_url: https://platform.claude.com/docs/en/agent-sdk/slash-commands
-crawled_at: 2026-03-10 18:38:17
+crawled_at: 2026-03-11 18:44:08
 ---
 
 # Slash Commands in the SDK
