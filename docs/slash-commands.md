@@ -1,6 +1,6 @@
 ---
 source_url: https://platform.claude.com/docs/en/agent-sdk/slash-commands
-crawled_at: 2026-03-11 18:44:08
+crawled_at: 2026-03-12 18:42:08
 ---
 
 # Slash Commands in the SDK
@@ -169,12 +169,16 @@ asyncio.run(main())
 
 In addition to using built-in slash commands, you can create your own custom commands that are available through the SDK. Custom commands are defined as markdown files in specific directories, similar to how subagents are configured.
 
+<Note>
+The `.claude/commands/` directory is the legacy format. The recommended format is `.claude/skills/<name>/SKILL.md`, which supports the same slash-command invocation (`/name`) plus autonomous invocation by Claude. See [Skills](/docs/en/agent-sdk/skills) for the current format. The CLI continues to support both formats, and the examples below remain accurate for `.claude/commands/`.
+</Note>
+
 ### File Locations
 
 Custom slash commands are stored in designated directories based on their scope:
 
-- **Project commands**: `.claude/commands/` - Available only in the current project
-- **Personal commands**: `~/.claude/commands/` - Available across all your projects
+- **Project commands**: `.claude/commands/` - Available only in the current project (legacy; prefer `.claude/skills/`)
+- **Personal commands**: `~/.claude/commands/` - Available across all your projects (legacy; prefer `~/.claude/skills/`)
 
 ### File Format
 

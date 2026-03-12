@@ -1,6 +1,6 @@
 ---
 source_url: https://platform.claude.com/docs/en/agent-sdk/overview
-crawled_at: 2026-03-11 18:43:59
+crawled_at: 2026-03-12 18:42:37
 ---
 
 # Agent SDK overview
