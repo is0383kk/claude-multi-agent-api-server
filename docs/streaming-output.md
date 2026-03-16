@@ -1,6 +1,6 @@
 ---
 source_url: https://platform.claude.com/docs/en/agent-sdk/streaming-output
-crawled_at: 2026-03-15 18:28:58
+crawled_at: 2026-03-16 18:52:16
 ---
 
 # Stream responses in real-time
