@@ -1,6 +1,6 @@
 ---
 source_url: https://platform.claude.com/docs/en/agent-sdk/mcp
-crawled_at: 2026-03-17 18:51:49
+crawled_at: 2026-03-18 18:50:17
 ---
 
 # Connect to external tools with MCP
