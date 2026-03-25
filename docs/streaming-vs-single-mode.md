@@ -1,6 +1,6 @@
 ---
 source_url: https://platform.claude.com/docs/en/agent-sdk/streaming-vs-single-mode
-crawled_at: 2026-03-24 18:52:54
+crawled_at: 2026-03-25 18:45:31
 ---
 
 # Streaming Input
