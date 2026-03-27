@@ -1,5 +1,5 @@
 > [!WARNING]
-> Development of this repository has ceased.
+> Development of this repository has ceased.  
 > It is currently being redeveloped as a resident AI agent; [OpenClaude](https://github.com/is0383kk/openclaude).
 
 # Claude Multi-Agent API Server
