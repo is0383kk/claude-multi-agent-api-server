@@ -1,3 +1,7 @@
+> [!WARNING]
+> Development of this repository has ceased.
+> It is currently being redeveloped as a resident AI agent; [OpenClaude](https://github.com/is0383kk/openclaude).
+
 # Claude Multi-Agent API Server
 
 A production-ready FastAPI web service that enables concurrent execution and management of multiple Claude Agent sessions via HTTP API.  
