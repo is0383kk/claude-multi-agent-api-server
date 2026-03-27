@@ -1,6 +1,6 @@
 ---
 source_url: https://platform.claude.com/docs/en/agent-sdk/sessions
-crawled_at: 2026-03-26 18:56:12
+crawled_at: 2026-03-27 18:46:29
 ---
 
 # Work with sessions
@@ -320,6 +320,8 @@ Session files are local to the machine that created them. To resume a session on
 - **Don't rely on session resume.** Capture the results you need (analysis output, decisions, file diffs) as application state and pass them into a fresh session's prompt. This is often more robust than shipping transcript files around.
 
 Both SDKs expose functions for enumerating sessions on disk and reading their messages: [`listSessions()`](/docs/en/agent-sdk/typescript#list-sessions) and [`getSessionMessages()`](/docs/en/agent-sdk/typescript#get-session-messages) in TypeScript, [`list_sessions()`](/docs/en/agent-sdk/python#list-sessions) and [`get_session_messages()`](/docs/en/agent-sdk/python#get-session-messages) in Python. Use them to build custom session pickers, cleanup logic, or transcript viewers.
+
+Both SDKs also expose functions for looking up and mutating individual sessions: [`get_session_info()`](/docs/en/agent-sdk/python#get-session-info), [`rename_session()`](/docs/en/agent-sdk/python#rename-session), and [`tag_session()`](/docs/en/agent-sdk/python#tag-session) in Python, and [`getSessionInfo()`](/docs/en/agent-sdk/typescript#get-session-info), [`renameSession()`](/docs/en/agent-sdk/typescript#rename-session), and [`tagSession()`](/docs/en/agent-sdk/typescript#tag-session) in TypeScript. Use them to organize sessions by tag or give them human-readable titles.
 
 ## Related resources
 
