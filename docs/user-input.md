@@ -1,6 +1,6 @@
 ---
 source_url: https://platform.claude.com/docs/en/agent-sdk/user-input
-crawled_at: 2026-03-27 18:46:26
+crawled_at: 2026-03-28 18:29:42
 ---
 
 # Handle approvals and user input

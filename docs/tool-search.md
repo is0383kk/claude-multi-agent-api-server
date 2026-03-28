@@ -1,6 +1,6 @@
 ---
 source_url: https://platform.claude.com/docs/en/agent-sdk/tool-search
-crawled_at: 2026-03-27 18:45:56
+crawled_at: 2026-03-28 18:29:27
 ---
 
 # Scale to many tools with tool search
