@@ -1,6 +1,6 @@
 ---
 source_url: https://platform.claude.com/docs/en/agent-sdk/file-checkpointing
-crawled_at: 2026-03-28 18:29:39
+crawled_at: 2026-03-29 18:31:17
 ---
 
 # Rewind file changes with checkpointing
