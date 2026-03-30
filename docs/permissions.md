@@ -1,6 +1,6 @@
 ---
 source_url: https://platform.claude.com/docs/en/agent-sdk/permissions
-crawled_at: 2026-03-29 18:31:34
+crawled_at: 2026-03-30 18:50:59
 ---
 
 # Configure permissions
