@@ -1,6 +1,6 @@
 ---
 source_url: https://platform.claude.com/docs/en/agent-sdk/agent-loop
-crawled_at: 2026-03-30 18:51:20
+crawled_at: 2026-03-31 18:51:00
 ---
 
 # How the agent loop works
