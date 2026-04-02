@@ -1,6 +1,6 @@
 ---
 source_url: https://platform.claude.com/docs/en/agent-sdk/sessions
-crawled_at: 2026-04-01 18:51:24
+crawled_at: 2026-04-02 18:45:15
 ---
 
 # Work with sessions

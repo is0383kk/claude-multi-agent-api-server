@@ -1,6 +1,6 @@
 ---
 source_url: https://platform.claude.com/docs/en/agent-sdk/claude-code-features
-crawled_at: 2026-04-01 18:51:26
+crawled_at: 2026-04-02 18:45:20
 ---
 
 # Use Claude Code features in the SDK
