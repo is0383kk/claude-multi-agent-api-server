@@ -1,6 +1,6 @@
 ---
 source_url: https://platform.claude.com/docs/en/agent-sdk/hosting
-crawled_at: 2026-04-02 18:45:04
+crawled_at: 2026-04-03 18:36:38
 ---
 
 # Hosting the Agent SDK
@@ -29,8 +29,7 @@ Each SDK instance requires:
 
 - **Runtime dependencies**
   - Python 3.10+ (for Python SDK) or Node.js 18+ (for TypeScript SDK)
-  - Node.js (required by Claude Code CLI)
-  - Claude Code CLI: `npm install -g @anthropic-ai/claude-code`
+  - Node.js (required by the bundled Claude Code CLI that the SDK spawns; both SDK packages include it, so no separate install is needed)
 
 - **Resource allocation**
   - Recommended: 1GiB RAM, 5GiB of disk, and 1 CPU (vary this based on your task as needed)

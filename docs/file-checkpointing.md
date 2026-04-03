@@ -1,6 +1,6 @@
 ---
 source_url: https://platform.claude.com/docs/en/agent-sdk/file-checkpointing
-crawled_at: 2026-04-02 18:45:21
+crawled_at: 2026-04-03 18:36:30
 ---
 
 # Rewind file changes with checkpointing
@@ -266,7 +266,7 @@ for await (const msg of rewindQuery) {
 If you capture the session ID and checkpoint ID, you can also rewind from the CLI:
 
 ```bash
-claude --resume <session-id> --rewind-files <checkpoint-uuid>
+claude -p --resume <session-id> --rewind-files <checkpoint-uuid>
 ```
 
 </Step>
