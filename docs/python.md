@@ -1,6 +1,6 @@
 ---
 source_url: https://platform.claude.com/docs/en/agent-sdk/python
-crawled_at: 2026-04-03 18:36:36
+crawled_at: 2026-04-04 18:31:28
 ---
 
 # Agent SDK reference - Python
