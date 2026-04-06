@@ -1,6 +1,6 @@
 ---
 source_url: https://platform.claude.com/docs/en/agent-sdk/cost-tracking
-crawled_at: 2026-04-05 18:32:03
+crawled_at: 2026-04-06 18:46:21
 ---
 
 # Track cost and usage
