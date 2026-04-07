@@ -1,6 +1,6 @@
 ---
 source_url: https://platform.claude.com/docs/en/agent-sdk/subagents
-crawled_at: 2026-04-06 18:46:15
+crawled_at: 2026-04-07 18:53:15
 ---
 
 # Subagents in the SDK
