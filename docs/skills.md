@@ -1,6 +1,6 @@
 ---
 source_url: https://platform.claude.com/docs/en/agent-sdk/skills
-crawled_at: 2026-04-07 18:53:46
+crawled_at: 2026-04-08 19:05:34
 ---
 
 # Agent Skills in the SDK
@@ -110,7 +110,7 @@ The `allowed-tools` frontmatter field in SKILL.md is only supported when using C
 When using the SDK, control tool access through the main `allowedTools` option in your query configuration.
 </Note>
 
-To control tool access for Skills in SDK applications, use `allowedTools` to pre-approve specific tools. Without a `canUseTool` callback, anything not in the list is denied:
+To control tool access for Skills in SDK applications, use `allowedTools` to pre-approve specific tools, and pair it with `permissionMode: "dontAsk"` so anything not in the list is denied. `allowedTools` alone only pre-approves the listed tools; unlisted tools fall through to the active permission mode rather than being blocked:
 
 <Note>
 Import statements from the first example are assumed in the following code snippets.
@@ -122,6 +122,7 @@ Import statements from the first example are assumed in the following code snipp
 options = ClaudeAgentOptions(
     setting_sources=["user", "project"],  # Load Skills from filesystem
     allowed_tools=["Skill", "Read", "Grep", "Glob"],
+    permission_mode="dontAsk",  # Deny anything not in allowed_tools
 )
 
 async for message in query(prompt="Analyze the codebase structure", options=options):
