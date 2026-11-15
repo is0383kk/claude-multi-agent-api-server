@@ -1,6 +1,6 @@
 ---
 source_url: https://platform.claude.com/docs/en/agent-sdk/user-input
-crawled_at: 2026-11-14 21:51:06
+crawled_at: 2026-11-15 22:19:39
 ---
 
 <!doctype html>

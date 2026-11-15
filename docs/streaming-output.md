@@ -1,6 +1,6 @@
 ---
 source_url: https://platform.claude.com/docs/en/agent-sdk/streaming-output
-crawled_at: 2026-11-14 21:51:18
+crawled_at: 2026-11-15 22:19:27
 ---
 
 <!doctype html>

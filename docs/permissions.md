@@ -1,6 +1,6 @@
 ---
 source_url: https://platform.claude.com/docs/en/agent-sdk/permissions
-crawled_at: 2026-11-14 21:50:47
+crawled_at: 2026-11-15 22:19:56
 ---
 
 <!doctype html>

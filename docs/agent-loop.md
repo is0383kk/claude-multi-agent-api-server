@@ -1,6 +1,6 @@
 ---
 source_url: https://platform.claude.com/docs/en/agent-sdk/agent-loop
-crawled_at: 2026-11-14 21:51:26
+crawled_at: 2026-11-15 22:19:25
 ---
 
 <!doctype html>
